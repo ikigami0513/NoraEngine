@@ -1,0 +1,2 @@
+cmake .. -G "MinGW Makefiles" -DCMAKE_C_COMPILER=gcc.exe -DCMAKE_CXX_COMPILER=g++.exe
+mingw32-make.exe
