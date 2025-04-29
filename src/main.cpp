@@ -4,9 +4,7 @@
 int main() {
 	try {
 		py::scoped_interpreter guard{};
-
-		Window window;
-		window.Run();
+		Window::GetInstance().Run();
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Unhandled exception: " << e.what() << std::endl;
