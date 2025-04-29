@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 #include "Graphics/Color.hpp"
+#include "Graphics/Shader.hpp"
+#include "Input.hpp"
 
 namespace py = pybind11;
 
@@ -32,12 +34,16 @@ class Window {
         void InitGLFW();
         void CreateWindow();
         void InitGLAD();
+        void Setup();
         void ProcessInput();
+        void Update();
         void Render();
         void Shutdown();
 
         void OnResize(int width, int height);
         static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+
+        static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
         GLFWwindow* m_window = nullptr;
         std::string m_title = "Nora Engine";
@@ -45,6 +51,16 @@ class Window {
         int m_height = 600;
 
         std::unique_ptr<py::object> m_game;
+        std::unique_ptr<Shader> m_shader;
+
+        float vertices[18] = {
+            // positions         // colors
+             0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
+            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
+             0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top 
+        };
+
+        unsigned int VAO, VBO;
 };
 
 #endif
