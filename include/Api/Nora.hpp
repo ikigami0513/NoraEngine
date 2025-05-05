@@ -57,6 +57,10 @@ public:
         }
     }
 
+    py::object PyComponent() {
+        return py_component_;
+    }
+
 private:
     py::object py_component_;
 };
@@ -243,17 +247,18 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def(py::init<>())
         .def("add_component", [](Entity& self, const py::object& py_comp) {
             auto comp = std::make_shared<PythonComponentWrapper>(py_comp);
+            comp->SetOwner(&self);
             self.AddComponent(comp);
         })
-        .def("get_component", [](const Entity& self, const py::object& type) -> Component* {
-            const auto& components = self.Components();
-            for (const auto& comp : components) {
-                py::object py_comp = py::cast(comp);
-                if (py::isinstance(py_comp, type)) {
-                    return comp.get();
+        .def("get_component", [](const Entity& self, const py::object& type) -> py::object {
+            for (const auto& comp : self.Components()) {
+                if (auto py_wrapper = dynamic_cast<PythonComponentWrapper*>(comp.get())) {
+                    if (py::isinstance(py_wrapper->PyComponent(), type)) {
+                        return py_wrapper->PyComponent();
+                    }
                 }
             }
-            return nullptr;
+            return py::none();
         }, py::return_value_policy::reference)
         .def_property_readonly("transform", [](const Entity& self) -> const Transform& {
             return self.GetTransform();
