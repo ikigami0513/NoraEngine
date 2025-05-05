@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <unordered_map>
-#include "Key.hpp"
+#include "Core/Key.hpp"
 
 class Input {
     public:

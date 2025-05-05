@@ -1,4 +1,9 @@
 from enum import Enum
+from typing import TypeVar, List
+
+
+_T = TypeVar('_T')
+
 
 class Time:
     """
@@ -24,6 +29,7 @@ class Window:
     """
 
     background_color: Color
+    scene: Scene
 
     @staticmethod
     def set_title(title: str) -> None:
@@ -150,3 +156,59 @@ class Input:
         :parem key: A value from the key enum
         :return: True if the key is just released, False otherwise
         """
+
+
+class Component:
+    """
+    Base class for all components.
+    """
+    owner: 'Entity'
+
+    def __init__(self) -> None: ...
+    def start(self) -> None: ...
+    def update(self) -> None: ...
+
+
+class Camera(Component):
+    """
+    A basic camera component.
+    """
+    def __init__(self) -> None: ...
+
+
+class Transform:
+    """
+    Represents the position, rotation, and scale of an entity.
+    """
+    # Assuming Transform has members like position, rotation, scale
+    # You'll need to add the actual members based on your C++ Transform class
+    ...
+
+class Entity:
+    """
+    Represents an entity in the game world.
+    Entities can have components attached to them.
+    """
+    transform: Transform
+
+    def add_component(self, component: Component) -> None:
+        """
+        Adds a component to this entity.
+
+        :param component: The component to add.
+        """
+
+    def get_component(self, type: type[_T]) -> _T | None:
+        """
+        Gets a component of the specified type attached to this entity.
+
+        :param type: The type of the component to retrieve (e.g., Camera).
+        :return: The component if found, otherwise None.
+        """
+    
+
+class Scene:
+    def __init__(self): ...
+
+    def add_entity(entity: Entity) -> None: ...
+    def get_root_entities() -> List[Entity]: ...

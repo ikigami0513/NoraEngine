@@ -1,10 +1,44 @@
 #include <pybind11/embed.h>
-#include "Time.hpp"
-#include "Input.hpp"
-#include "Key.hpp"
+#include "Core/Time.hpp"
+#include "Core/Input.hpp"
+#include "Core/Key.hpp"
 #include "Graphics/Color.hpp"
+#include "World/Entity.hpp"
+#include "World/Component.hpp"
+#include "World/Camera.hpp"
+#include <iostream>
 
 namespace py = pybind11;
+
+class PythonComponentWrapper : public Component {
+public:
+    PythonComponentWrapper(py::object py_component) : py_component_(py_component) {}
+
+    void Start() override {
+        try {
+            if (py::hasattr(py_component_, "start")) {
+                py::function start = py_component_.attr("start");
+                start();
+            }
+        } catch (const py::error_already_set& e) {
+            std::cerr << "Python exception in start: " << e.what() << std::endl;
+        }
+    }
+
+    void Update() override {
+        try {
+            if (py::hasattr(py_component_, "update")) {
+                py::function update = py_component_.attr("update");
+                update();
+            }
+        } catch (const py::error_already_set& e) {
+            std::cerr << "Python exception in update: " << e.what() << std::endl;
+        }
+    }
+
+private:
+    py::object py_component_;
+};
 
 PYBIND11_EMBEDDED_MODULE(nora, m) {
     py::class_<Color>(m, "Color")
@@ -52,7 +86,17 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         })
         .def_static("set_size", [](int width, int height) {
             Window::GetInstance().SetSize(width, height);
-        });
+        })
+        .def_property_static(
+            "scene",
+            [](py::object) -> Scene& {
+                return Window::GetInstance().GetScene();
+            },
+            [](py::object, const Scene& scene) {
+                Window::GetInstance().SetScene(scene);
+            },
+            "The current scene of the window."
+        );
 
     py::enum_<Key>(m, "Key")
         .value("Unknown", Key::Unknown)
@@ -109,9 +153,46 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .value("Down", Key::Down)
         .value("Up", Key::Up)
         .export_values();
-        
+
     py::class_<Input>(m, "Input")
         .def_static("is_key_pressed", &Input::IsKeyPressed, py::arg("key"), "Returns True if the specified key is currently pressed.")
         .def_static("is_just_pressed", &Input::IsJustPressed, py::arg("key"), "Returns True if the specified key is just pressed.")
         .def_static("is_just_released", &Input::IsJustReleased, py::arg("key"), "Returns True if the specified key is just released.");
+
+    py::class_<Component, std::shared_ptr<Component>>(m, "Component") // Removed PyComponent here
+        .def(py::init<>())
+        .def("start", &Component::Start)
+        .def("update", &Component::Update)
+        .def_property_readonly("owner", [](const Component& self) {
+            Entity* owner = self.GetOwner();
+            return owner ? py::weakref(py::cast(owner)) : py::weakref(py::none());
+        });
+
+    py::class_<Camera, Component, std::shared_ptr<Camera>>(m, "Camera")
+        .def(py::init<>());
+
+    py::class_<Scene>(m, "Scene")
+        .def(py::init<>())
+        .def("add_entity", &Scene::AddEntity)
+        .def("get_root_entities", &Scene::GetRootEntities);
+
+    py::class_<Entity, std::shared_ptr<Entity>>(m, "Entity")
+        .def(py::init<>())
+        .def("add_component", [](Entity& self, const py::object& py_comp) { // Retour à py::object
+            auto comp = std::make_shared<PythonComponentWrapper>(py_comp); // Cast to std::shared_ptr<Component>
+            self.AddComponent(comp);
+        })
+        .def("get_component", [](const Entity& self, const py::object& type) -> Component* {
+            const auto& components = self.Components();
+            for (const auto& comp : components) {
+                py::object py_comp = py::cast(comp);
+                if (py::isinstance(py_comp, type)) {
+                    return comp.get();
+                }
+            }
+            return nullptr;
+        }, py::return_value_policy::reference)
+        .def_property_readonly("transform", [](const Entity& self) -> const Transform& {
+            return self.GetTransform();
+        });
 }

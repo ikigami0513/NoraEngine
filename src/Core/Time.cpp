@@ -1,9 +1,9 @@
-#include "Time.hpp"
+#include "Core/Time.hpp"
 
 double Time::lastTime = 0.0;
 double Time::fpsLastTime = 0.0;
 float Time::fps = 0.0f;
-float Time::deltaTime = 0.0f;
+float Time::deltaTime = 1.0f / 60.0f;
 int Time::frameCount = 0;
 
 void Time::UpdateDeltaTime(double currentTime) {

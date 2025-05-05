@@ -1,5 +1,6 @@
-#include "Window.hpp"
-#include "Time.hpp"
+#include "Core/Window.hpp"
+#include "Core/Time.hpp"
+#include <iostream>
 
 Window& Window::GetInstance() {
     static Window instance;
@@ -82,7 +83,7 @@ void Window::ProcessInput() {
 }
 
 void Window::Update() {
-    m_game->attr("update")();
+    m_scene.Update();
 }
 
 void Window::Render() {
@@ -109,12 +110,20 @@ void Window::Run() {
     InitGLAD();
     Setup();
 
-    py::object initialize = m_game->attr("initialize")();
+    try {
+        py::object initialize = m_game->attr("initialize")();
+    }
+    catch (const py::error_already_set& e) {
+        std::cerr << "Python error during initialize: " << e.what() << std::endl;
+    }
 
+    m_scene.Start();
+    
     while (!glfwWindowShouldClose(m_window)) {
         float currentTime = glfwGetTime();
         Time::UpdateDeltaTime(currentTime);
         Time::CalculateFPS(currentTime);
+
         ProcessInput();
         Update();
         Render();
@@ -144,6 +153,10 @@ void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
     Input::KeyCallback(window, key, scancode, action, mods);
 }
 
+std::unique_ptr<py::object> Window::Game() {
+    return std::move(m_game);
+}
+
 std::string Window::GetTitle() const {
     return m_title;
 }
@@ -165,4 +178,12 @@ void Window::SetSize(int width, int height) {
     if (m_window) {
         glfwSetWindowSize(m_window, m_width, m_height);
     }
+}
+
+Scene& Window::GetScene() {
+    return m_scene;
+}
+
+void Window::SetScene(const Scene& scene) {
+    m_scene = scene;
 }

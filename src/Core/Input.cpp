@@ -1,4 +1,4 @@
-#include "Input.hpp"
+#include "Core/Input.hpp"
 
 void Input::Init() {
     s_keys.clear();

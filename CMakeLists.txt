@@ -75,6 +75,11 @@ endif()
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE pybind11::embed Python3::Python)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(STATUS "Forcing RTTI ON for GCC/Clang")
+    target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -frtti)
+endif()
+
 
 if(MSVC) # If using the VS compiler...
 
