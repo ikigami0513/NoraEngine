@@ -10,8 +10,10 @@ class FPSDisplayComponent(Component):
 
 def initialize() -> None:
     Window.set_title("Hello Triangle - Nora Engine Example")
-    Window.set_size(800, 600)
+    Window.set_size(1080, 720)
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
     e = Entity()
-    e.add_component(FPSDisplayComponent())
+    fps_component = FPSDisplayComponent()
+    e.add_component(fps_component)
+    fps_component.set_owner(e)
     Window.scene.add_entity(e)

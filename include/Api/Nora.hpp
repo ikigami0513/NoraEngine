@@ -6,9 +6,30 @@
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
 #include "World/Camera.hpp"
+#include "World/Transform.hpp" // Inclure l'en-tête de Transform
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp> // Pour la conversion de glm::mat4 vers Python list/tuple
 
 namespace py = pybind11;
+
+// Fonction utilitaire pour convertir un glm::vec3 en tuple Python
+py::tuple glm_vec3_to_tuple(const glm::vec3& v) {
+    return py::make_tuple(v.x, v.y, v.z);
+}
+
+// Fonction utilitaire pour convertir un glm::mat4 en liste de listes Python
+py::list glm_mat4_to_list(const glm::mat4& m) {
+    py::list outer_list;
+    for (int i = 0; i < 4; ++i) {
+        py::list inner_list;
+        for (int j = 0; j < 4; ++j) {
+            inner_list.append(m[i][j]);
+        }
+        outer_list.append(inner_list);
+    }
+    return outer_list;
+}
 
 class PythonComponentWrapper : public Component {
 public:
@@ -41,6 +62,48 @@ private:
 };
 
 PYBIND11_EMBEDDED_MODULE(nora, m) {
+    py::class_<glm::vec3>(m, "Vec3")
+        .def(py::init<float, float, float>(), py::arg("x") = 0.0f, py::arg("y") = 0.0f, py::arg("z") = 0.0f)
+        .def_readwrite("x", &glm::vec3::x)
+        .def_readwrite("y", &glm::vec3::y)
+        .def_readwrite("z", &glm::vec3::z)
+        .def("__repr__", [](const glm::vec3& v) {
+            return "<Vec3 x=" + std::to_string(v.x) + " y=" + std::to_string(v.y) + " z=" + std::to_string(v.z) + ">";
+        });
+
+    py::class_<glm::mat4>(m, "Mat4")
+        .def(py::init<>())
+        .def("__repr__", [](const glm::mat4& mat) {
+            std::string s = "<Mat4\n";
+            for (int i = 0; i < 4; ++i) {
+                s += "[";
+                for (int j = 0; j < 4; ++j) {
+                    s += std::to_string(mat[i][j]);
+                    if (j < 3) s += ", ";
+                }
+                s += "]\n";
+            }
+            s += ">";
+            return s;
+        });
+        // Suppression de la tentative d'exposer via __getitem__ avec py::array_t
+
+    py::class_<Transform>(m, "Transform")
+        .def(py::init<>())
+        .def_property("local_position", &Transform::GetLocalPosition, &Transform::SetLocalPosition)
+        .def_property("local_rotation", &Transform::GetLocalRotation, &Transform::SetLocalRotation)
+        .def_property("local_scale", &Transform::GetLocalScale, &Transform::SetLocalScale)
+        .def_property_readonly("global_position", &Transform::GetGlobalPosition)
+        .def_property_readonly("model_matrix", [](const Transform& self) {
+            return glm_mat4_to_list(self.GetModelMatrix());
+        })
+        .def_property_readonly("right", [](const Transform& self) { return glm_vec3_to_tuple(self.GetRight()); })
+        .def_property_readonly("up", [](const Transform& self) { return glm_vec3_to_tuple(self.GetUp()); })
+        .def_property_readonly("backward", [](const Transform& self) { return glm_vec3_to_tuple(self.GetBackward()); })
+        .def_property_readonly("forward", [](const Transform& self) { return glm_vec3_to_tuple(self.GetForward()); })
+        .def_property_readonly("global_scale", [](const Transform& self) { return glm_vec3_to_tuple(self.GetGlobalScale()); })
+        .def_property_readonly("is_dirty", &Transform::IsDirty);
+
     py::class_<Color>(m, "Color")
         .def(
             py::init<float, float, float, float>(),
@@ -55,9 +118,9 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_readwrite("alpha", &Color::alpha)
         .def("__repr__", [](const Color& c) {
             return "<Color r=" + std::to_string(c.r) +
-                " g=" + std::to_string(c.g) +
-                " b=" + std::to_string(c.b) +
-                " alpha=" + std::to_string(c.alpha) + ">";
+                   " g=" + std::to_string(c.g) +
+                   " b=" + std::to_string(c.b) +
+                   " alpha=" + std::to_string(c.alpha) + ">";
         });
 
     py::class_<Time>(m, "Time")
@@ -159,13 +222,13 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_static("is_just_pressed", &Input::IsJustPressed, py::arg("key"), "Returns True if the specified key is just pressed.")
         .def_static("is_just_released", &Input::IsJustReleased, py::arg("key"), "Returns True if the specified key is just released.");
 
-    py::class_<Component, std::shared_ptr<Component>>(m, "Component") // Removed PyComponent here
+    py::class_<Component, std::shared_ptr<Component>>(m, "Component")
         .def(py::init<>())
         .def("start", &Component::Start)
         .def("update", &Component::Update)
+        .def("set_owner", &Component::SetOwner)
         .def_property_readonly("owner", [](const Component& self) {
-            Entity* owner = self.GetOwner();
-            return owner ? py::weakref(py::cast(owner)) : py::weakref(py::none());
+            return self.GetOwner();
         });
 
     py::class_<Camera, Component, std::shared_ptr<Camera>>(m, "Camera")
@@ -178,8 +241,8 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
 
     py::class_<Entity, std::shared_ptr<Entity>>(m, "Entity")
         .def(py::init<>())
-        .def("add_component", [](Entity& self, const py::object& py_comp) { // Retour à py::object
-            auto comp = std::make_shared<PythonComponentWrapper>(py_comp); // Cast to std::shared_ptr<Component>
+        .def("add_component", [](Entity& self, const py::object& py_comp) {
+            auto comp = std::make_shared<PythonComponentWrapper>(py_comp);
             self.AddComponent(comp);
         })
         .def("get_component", [](const Entity& self, const py::object& type) -> Component* {

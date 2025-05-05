@@ -55,8 +55,7 @@ class Entity {
 
         // Components
         void AddComponent(std::shared_ptr<Component> component) {
-            component->OnAttach(this);
-            m_components.push_back(std::move(component));
+            m_components.push_back(component);
         }
 
         template<typename T>

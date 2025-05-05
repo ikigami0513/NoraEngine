@@ -1,8 +1,73 @@
 from enum import Enum
-from typing import TypeVar, List
+from typing import TypeVar, List, Tuple
 
 
 _T = TypeVar('_T')
+
+
+class Vec3:
+    """
+    Represents a 3D vector.
+    """
+    x: float
+    y: float
+    z: float
+
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> None: ...
+
+    def __repr__(self) -> str: ...
+
+
+class Mat4:
+    """
+    Represents a 4x4 matrix.
+    """
+    # Accessing elements might be tricky without further definition
+    def __init__(self) -> None: ...
+
+    def __repr__(self) -> str: ...
+    def __getitem__(self, index: int) -> List[float]: ... # Assuming row access
+
+
+class Transform:
+    """
+    Represents the position, rotation, and scale of an entity.
+    """
+    local_position: Vec3
+    """The local position of the entity."""
+
+    local_rotation: Vec3
+    """The local rotation (Euler angles in degrees) of the entity."""
+
+    local_scale: Vec3
+    """The local scale of the entity."""
+
+    global_position: Vec3
+    """The global position of the entity in world space (read-only)."""
+
+    model_matrix: List[List[float]]
+    """The combined model matrix representing the entity's transformation (read-only)."""
+
+    right: Tuple[float, float, float]
+    """The right vector of the entity in world space (read-only)."""
+
+    up: Tuple[float, float, float]
+    """The up vector of the entity in world space (read-only)."""
+
+    backward: Tuple[float, float, float]
+    """The backward vector of the entity in world space (read-only)."""
+
+    forward: Tuple[float, float, float]
+    """The forward vector of the entity in world space (read-only)."""
+
+    global_scale: Tuple[float, float, float]
+    """The global scale of the entity (read-only)."""
+
+    is_dirty: bool
+    """Returns True if the transform has been modified since the last computation."""
+
+    def __init__(self) -> None: ...
+        
 
 
 class Time:
@@ -167,6 +232,7 @@ class Component:
     def __init__(self) -> None: ...
     def start(self) -> None: ...
     def update(self) -> None: ...
+    def set_owner(self, entity: Entity) -> None: ...
 
 
 class Camera(Component):
@@ -175,14 +241,6 @@ class Camera(Component):
     """
     def __init__(self) -> None: ...
 
-
-class Transform:
-    """
-    Represents the position, rotation, and scale of an entity.
-    """
-    # Assuming Transform has members like position, rotation, scale
-    # You'll need to add the actual members based on your C++ Transform class
-    ...
 
 class Entity:
     """
