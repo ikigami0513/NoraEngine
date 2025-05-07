@@ -1,6 +1,7 @@
 #ifndef TRANSFORM_HPP
 #define TRANSFORM_HPP
 
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -55,7 +56,7 @@ class Transform {
             m_isDirty = true;
         }
 
-        const glm::vec3& GetGlobalPosition() const {
+        const glm::vec3 GetGlobalPosition() const {
             return m_modelMatrix[3];
         }
 

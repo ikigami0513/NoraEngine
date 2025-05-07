@@ -45,22 +45,22 @@ class Transform:
     global_position: Vec3
     """The global position of the entity in world space (read-only)."""
 
-    model_matrix: List[List[float]]
+    model_matrix: Mat4
     """The combined model matrix representing the entity's transformation (read-only)."""
 
-    right: Tuple[float, float, float]
+    right: Vec3
     """The right vector of the entity in world space (read-only)."""
 
-    up: Tuple[float, float, float]
+    up: Vec3
     """The up vector of the entity in world space (read-only)."""
 
-    backward: Tuple[float, float, float]
+    backward: Vec3
     """The backward vector of the entity in world space (read-only)."""
 
-    forward: Tuple[float, float, float]
+    forward: Vec3
     """The forward vector of the entity in world space (read-only)."""
 
-    global_scale: Tuple[float, float, float]
+    global_scale: Vec3
     """The global scale of the entity (read-only)."""
 
     is_dirty: bool
@@ -191,10 +191,27 @@ class Key(Enum):
     Up = 265
 
 
+class MouseCode(Enum):
+    Button1 = 0
+    Button2 = 1
+    Button3 = 2
+    Button4 = 3
+    Button5 = 4
+    Button6 = 5
+    Button7 = 6
+    Button8 = 7
+    Left = 0
+    Right = 1
+    Middle = 2
+
+
 class Input:
     """
     Input handling class that provides static methods to query user input.
     """
+    mouse_position: Tuple[float, float]
+    mouse_delta: Tuple[float, float]
+    scroll_delta: Tuple[float, float]
 
     @staticmethod
     def is_key_pressed(key: Key) -> bool:
@@ -222,6 +239,15 @@ class Input:
         :return: True if the key is just released, False otherwise
         """
 
+    @staticmethod
+    def is_mouse_button_pressed(mouse_code: MouseCode) -> bool: ...
+
+    @staticmethod
+    def is_mouse_button_just_pressed(mouse_code: MouseCode) -> bool: ...
+
+    @staticmethod
+    def is_mouse_button_just_released(mouse_code: MouseCode) -> bool: ...
+
 
 class Component:
     """
@@ -239,6 +265,12 @@ class Camera(Component):
     """
     A basic camera component.
     """
+    front: Vec3
+    right: Vec3
+    yaw: float
+    pitch: float
+    zoom: float
+
     def __init__(self) -> None: ...
 
 

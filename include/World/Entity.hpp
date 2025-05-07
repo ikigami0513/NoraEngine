@@ -3,6 +3,7 @@
 
 #include "World/Transform.hpp"
 #include "World/Component.hpp"
+#include "Api/PythonComponentWrapper.hpp"
 
 #include <vector>
 #include <memory>
@@ -60,12 +61,26 @@ class Entity {
 
         template<typename T>
         T* GetComponent() const {
-            static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
-            for (const auto& comp : m_components) {
-                if (auto casted = dynamic_cast<T*>(comp.get())) {
-                    return casted;
+            for (const auto& comp_ptr : m_components) {
+                if (T* specific_comp = dynamic_cast<T*>(comp_ptr.get())) {
+                    return specific_comp;
+                }
+
+                if (PythonComponentWrapper* wrapper = dynamic_cast<PythonComponentWrapper*>(comp_ptr.get())) {
+                    py::object py_obj = wrapper->PyComponent();
+                    if (py_obj) {
+                        if (py::isinstance(py_obj, py::type::of<T>())) {
+                            try {
+                                return py_obj.cast<T*>();
+                            }
+                            catch (const py::cast_error& e) {
+                                std::cerr <<"Pybind11 cast error in Entity::GetComponent<T>: " << e.what() << std::endl;
+                            }
+                        }
+                    }
                 }
             }
+
             return nullptr;
         }
 
@@ -82,6 +97,13 @@ class Entity {
     // Update
     void Update() {
         // Update own components
+        if (m_parent) {
+            m_transform.ComputeModelMatrix(m_parent->GetTransform().GetModelMatrix());
+        }
+        else {
+            m_transform.ComputeModelMatrix();
+        }
+
         for (auto& component : m_components) {
             component->Update();
         }

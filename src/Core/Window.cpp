@@ -1,6 +1,11 @@
 #include "Core/Window.hpp"
 #include "Core/Time.hpp"
+#include "World/Camera.hpp"
+#include "World/Entity.hpp"
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Window& Window::GetInstance() {
     static Window instance;
@@ -47,6 +52,11 @@ void Window::CreateWindow() {
 
     glfwSetFramebufferSizeCallback(m_window, FramebufferSizeCallback);
     glfwSetKeyCallback(m_window, KeyCallback);
+    glfwSetMouseButtonCallback(m_window, MouseButtonCallback);
+    glfwSetCursorPosCallback(m_window, CursorPosCallback);
+    glfwSetScrollCallback(m_window, ScrollCallback);
+
+    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Window::InitGLAD() {
@@ -68,12 +78,19 @@ void Window::Setup() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    texture1 = std::make_unique<Texture>("../resources/textures/container.jpg");
+    texture2 = std::make_unique<Texture>("../resources/textures/awesomeface.png", true);
+
+    m_shader->Use();
+    m_shader->SetInt("texture1", 0);
+    m_shader->SetInt("texture2", 1);
 }
 
 void Window::ProcessInput() {
@@ -87,27 +104,56 @@ void Window::Update() {
 }
 
 void Window::Render() {
-    try {
-        glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.alpha);
-        glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.alpha);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    std::vector<Entity*> cameraEntities = m_scene.GetEntitiesWithComponent<Camera>();
+    if (!cameraEntities.empty()) {
+        Camera* camera = cameraEntities[0]->GetComponent<Camera>();
+
+        // bind textures on corresponding texture units
+        texture1->Bind(0);
+        texture2->Bind(1);
+
+        // activate shader
         m_shader->Use();
+        
+        // pass projection matrix to shader (note that in this case it could change every frame)
+        glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)m_width / (float)m_height, 0.1f, 100.0f);
+        m_shader->SetMat4("projection", projection);
+
+        // camera/view transformation
+        glm::mat4 view = camera->GetViewMatrix();
+        m_shader->SetMat4("view", view);
+
+        // render boxes
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-    catch (const py::error_already_set& e) {
-        std::cerr << "Python error during render: " << e.what() << std::endl;
+        for (unsigned int i = 0; i < 10; i++) {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f); // maje sure to initialize matrix to identity matrix first
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            m_shader->SetMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        
+        glBindVertexArray(0);
     }
 }
 
 void Window::Shutdown() {
     m_game = std::make_unique<py::object>(); // Reset to null object
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &VBO);
 }
 
 void Window::Run() {
     InitGLFW();
     CreateWindow();
     InitGLAD();
+    glEnable(GL_DEPTH_TEST);
     Setup();
 
     try {
@@ -151,6 +197,18 @@ void Window::OnResize(int width, int height) {
 
 void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Input::KeyCallback(window, key, scancode, action, mods);
+}
+
+void Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    Input::MouseButtonCallback(window, button, action, mods);
+}
+
+void Window::CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+    Input::CursorPosCallback(window, xpos, ypos);
+}
+
+void Window::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    Input::ScrollCallback(window, xoffset, yoffset);
 }
 
 std::unique_ptr<py::object> Window::Game() {

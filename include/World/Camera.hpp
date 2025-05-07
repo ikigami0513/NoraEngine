@@ -16,7 +16,7 @@ enum CameraMovement {
 class Camera : public Component {
     private:
         // Camera attributes
-        glm::vec3 Front {0.0f, 0.0f, -1.0f };
+        glm::vec3 Front { 0.0f, 0.0f, -1.0f };
         glm::vec3 Up {};
         glm::vec3 Right {};
         glm::vec3 WorldUp;
@@ -45,10 +45,18 @@ class Camera : public Component {
         );
 
         glm::mat4 GetViewMatrix() const;
-        void ProcessKeyboard(CameraMovement direction);
-        void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
-        void ProcessMouseScroll(float yoffset);
+
+        float GetYaw() const;
+        float GetPitch() const;
         float GetZoom() const;
+
+        void SetYaw(float yaw);
+        void SetPitch(float pitch);
+        void SetZoom(float zoom);
+
+        glm::vec3 GetFront() const;
+        glm::vec3 GetRight() const;
+        void Update() override;
 };
 
 #endif

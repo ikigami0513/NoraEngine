@@ -1,4 +1,6 @@
+#include <iostream>
 #include <pybind11/embed.h>
+#include <pybind11/operators.h>
 #include "Core/Time.hpp"
 #include "Core/Input.hpp"
 #include "Core/Key.hpp"
@@ -6,64 +8,12 @@
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
 #include "World/Camera.hpp"
-#include "World/Transform.hpp" // Inclure l'en-tête de Transform
-#include <iostream>
+#include "World/Transform.hpp"
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp> // Pour la conversion de glm::mat4 vers Python list/tuple
+#include <glm/gtc/type_ptr.hpp>
+#include "Api/PythonComponentWrapper.hpp"
 
 namespace py = pybind11;
-
-// Fonction utilitaire pour convertir un glm::vec3 en tuple Python
-py::tuple glm_vec3_to_tuple(const glm::vec3& v) {
-    return py::make_tuple(v.x, v.y, v.z);
-}
-
-// Fonction utilitaire pour convertir un glm::mat4 en liste de listes Python
-py::list glm_mat4_to_list(const glm::mat4& m) {
-    py::list outer_list;
-    for (int i = 0; i < 4; ++i) {
-        py::list inner_list;
-        for (int j = 0; j < 4; ++j) {
-            inner_list.append(m[i][j]);
-        }
-        outer_list.append(inner_list);
-    }
-    return outer_list;
-}
-
-class PythonComponentWrapper : public Component {
-public:
-    PythonComponentWrapper(py::object py_component) : py_component_(py_component) {}
-
-    void Start() override {
-        try {
-            if (py::hasattr(py_component_, "start")) {
-                py::function start = py_component_.attr("start");
-                start();
-            }
-        } catch (const py::error_already_set& e) {
-            std::cerr << "Python exception in start: " << e.what() << std::endl;
-        }
-    }
-
-    void Update() override {
-        try {
-            if (py::hasattr(py_component_, "update")) {
-                py::function update = py_component_.attr("update");
-                update();
-            }
-        } catch (const py::error_already_set& e) {
-            std::cerr << "Python exception in update: " << e.what() << std::endl;
-        }
-    }
-
-    py::object PyComponent() {
-        return py_component_;
-    }
-
-private:
-    py::object py_component_;
-};
 
 PYBIND11_EMBEDDED_MODULE(nora, m) {
     py::class_<glm::vec3>(m, "Vec3")
@@ -71,6 +21,13 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_readwrite("x", &glm::vec3::x)
         .def_readwrite("y", &glm::vec3::y)
         .def_readwrite("z", &glm::vec3::z)
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * py::self)
+        .def(py::self / py::self)
+        .def(py::self * float())
+        .def(py::self / float())
+        .def(float() * py::self)
         .def("__repr__", [](const glm::vec3& v) {
             return "<Vec3 x=" + std::to_string(v.x) + " y=" + std::to_string(v.y) + " z=" + std::to_string(v.z) + ">";
         });
@@ -98,14 +55,12 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_property("local_rotation", &Transform::GetLocalRotation, &Transform::SetLocalRotation)
         .def_property("local_scale", &Transform::GetLocalScale, &Transform::SetLocalScale)
         .def_property_readonly("global_position", &Transform::GetGlobalPosition)
-        .def_property_readonly("model_matrix", [](const Transform& self) {
-            return glm_mat4_to_list(self.GetModelMatrix());
-        })
-        .def_property_readonly("right", [](const Transform& self) { return glm_vec3_to_tuple(self.GetRight()); })
-        .def_property_readonly("up", [](const Transform& self) { return glm_vec3_to_tuple(self.GetUp()); })
-        .def_property_readonly("backward", [](const Transform& self) { return glm_vec3_to_tuple(self.GetBackward()); })
-        .def_property_readonly("forward", [](const Transform& self) { return glm_vec3_to_tuple(self.GetForward()); })
-        .def_property_readonly("global_scale", [](const Transform& self) { return glm_vec3_to_tuple(self.GetGlobalScale()); })
+        .def_property_readonly("model_matrix", &Transform::GetModelMatrix)
+        .def_property_readonly("right", &Transform::GetRight)
+        .def_property_readonly("up", &Transform::GetUp)
+        .def_property_readonly("backward", &Transform::GetBackward)
+        .def_property_readonly("forward", &Transform::GetForward)
+        .def_property_readonly("global_scale", &Transform::GetGlobalScale)
         .def_property_readonly("is_dirty", &Transform::IsDirty);
 
     py::class_<Color>(m, "Color")
@@ -221,10 +176,48 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .value("Up", Key::Up)
         .export_values();
 
+    py::enum_<MouseCode>(m, "MouseCode")
+        .value("Button1", MouseCode::Button1)
+        .value("Button2", MouseCode::Button2)
+        .value("Button3", MouseCode::Button3)
+        .value("Button4", MouseCode::Button4)
+        .value("Button5", MouseCode::Button5)
+        .value("Button6", MouseCode::Button6)
+        .value("Button7", MouseCode::Button7)
+        .value("Button8", MouseCode::Button8)
+        .value("Left", MouseCode::Left)
+        .value("Right", MouseCode::Right)
+        .value("Middle", MouseCode::Middle)
+        .export_values();
+
     py::class_<Input>(m, "Input")
         .def_static("is_key_pressed", &Input::IsKeyPressed, py::arg("key"), "Returns True if the specified key is currently pressed.")
         .def_static("is_just_pressed", &Input::IsJustPressed, py::arg("key"), "Returns True if the specified key is just pressed.")
-        .def_static("is_just_released", &Input::IsJustReleased, py::arg("key"), "Returns True if the specified key is just released.");
+        .def_static("is_just_released", &Input::IsJustReleased, py::arg("key"), "Returns True if the specified key is just released.")
+        .def_static("is_mouse_button_pressed", &Input::IsMouseButtonPressed, py::arg("mouse_code"), "Returns True if the specified mouse button is currently pressed.")
+        .def_static("is_mouse_button_just_pressed", &Input::IsMouseButtonJustPressed, py::arg("mouse_code"), "Returns True if the specified mouse button is just pressed.")
+        .def_static("is_mouse_button_just_released", &Input::IsMouseButtonJustReleased, py::arg("mouse_code"), "Returns True if the specified mouse button is just released.")
+        .def_property_readonly_static(
+            "mouse_position",
+            [](py::object) {
+                return Input::GetMousePosition();
+            },
+            "Returns current mouse position."
+        )
+        .def_property_readonly_static(
+            "mouse_delta",
+            [](py::object) {
+                return Input::GetMouseDelta();
+            },
+            "Returns current mouse delta."
+        )
+        .def_property_readonly_static(
+            "scroll_delta",
+            [](py::object) {
+                return Input::GetScrollDelta();
+            },
+            "Returns current mouse scroll delta."
+        );
 
     py::class_<Component, std::shared_ptr<Component>>(m, "Component")
         .def(py::init<>())
@@ -236,7 +229,16 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         });
 
     py::class_<Camera, Component, std::shared_ptr<Camera>>(m, "Camera")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def_property_readonly("front", [](const Camera& cam) {
+            return cam.GetFront();
+        }, "Direction vector the camera is facing.")
+        .def_property_readonly("right", [](const Camera& cam) {
+            return cam.GetRight();
+        }, "Direction vector right of the camera.")
+        .def_property("zoom", &Camera::GetZoom, &Camera::SetZoom, "Camera field of view in degrees.")
+        .def_property("yaw", &Camera::GetYaw, &Camera::SetYaw, "Camera field of view in degrees.")
+        .def_property("pitch", &Camera::GetPitch, &Camera::SetPitch, "Camera field of view in degrees.");
 
     py::class_<Scene>(m, "Scene")
         .def(py::init<>())

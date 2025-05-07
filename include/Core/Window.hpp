@@ -8,6 +8,7 @@
 #include <string>
 #include "Graphics/Color.hpp"
 #include "Graphics/Shader.hpp"
+#include "Graphics/Texture.hpp"
 #include "Core/Input.hpp"
 #include "World/Scene.hpp"
 
@@ -53,6 +54,9 @@ class Window {
         static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
         static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+        static void CursorPosCallback(GLFWwindow*, double xpos, double ypos);
+        static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
         GLFWwindow* m_window = nullptr;
         std::string m_title = "Nora Engine";
@@ -62,14 +66,65 @@ class Window {
         std::unique_ptr<py::object> m_game;
         std::unique_ptr<Shader> m_shader;
 
-        float vertices[18] = {
-            // positions         // colors
-             0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
-             0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top 
+        float vertices[180] = {
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+   
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   
+           -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   
+           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+           -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        };
+
+        glm::vec3 cubePositions[10] = {
+            glm::vec3( 0.0f,  0.0f,  0.0f),
+            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3( 2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f,  3.0f, -7.5f),
+            glm::vec3( 1.3f, -2.0f, -2.5f),
+            glm::vec3( 1.5f,  2.0f, -2.5f),
+            glm::vec3( 1.5f,  0.2f, -1.5f),
+            glm::vec3(-1.3f,  1.0f, -1.5f)
         };
 
         unsigned int VAO, VBO;
+        std::unique_ptr<Texture> texture1, texture2;
 };
 
 #endif

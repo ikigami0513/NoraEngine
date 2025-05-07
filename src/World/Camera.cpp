@@ -11,53 +11,40 @@ glm::mat4 Camera::GetViewMatrix() const {
     return glm::lookAt(position, position + Front, Up);
 }
 
-void Camera::ProcessKeyboard(CameraMovement direction) {
-    Transform& transform = m_owner->GetTransform();
-    glm::vec3 position = transform.GetLocalPosition();
-
-    float velocity = MovementSpeed * Time::DeltaTime();
-    if (direction == FORWARD) {
-        position += Front * velocity;
-    }
-    if (direction == BACKWARD) {
-        position -= Front * velocity;
-    }
-    if (direction == LEFT) {
-        position -= Right * velocity;
-    }
-    if (direction == RIGHT) {
-        position += Right * velocity;
-    }
-
-    transform.SetLocalPosition(position);
-}
-
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
-    xoffset *= MouseSensitivity;
-    yoffset *= MouseSensitivity;
-
-    Yaw += xoffset;
-    Pitch += yoffset;
-
-    if (constrainPitch) {
-        if (Pitch > 89.0f) {
-            Pitch = 89.0f;
-        }
-        if (Pitch < -89.0f) {
-            Pitch = -89.0f;
-        }
-    }
-
+void Camera::Update() {
     UpdateCameraVectors();
 }
 
-void Camera::ProcessMouseScroll(float yoffset) {
-    Zoom -= yoffset;
-    Zoom = glm::clamp(Zoom, 1.0f, 45.0f);
+float Camera::GetYaw() const {
+    return Yaw;
+}
+
+float Camera::GetPitch() const {
+    return Pitch;
 }
 
 float Camera::GetZoom() const {
     return Zoom;
+}
+
+void Camera::SetYaw(float yaw) {
+    Yaw = yaw;
+}
+
+void Camera::SetPitch(float pitch) {
+    Pitch = pitch;
+}
+
+void Camera::SetZoom(float zoom) {
+    Zoom = zoom;
+}
+
+glm::vec3 Camera::GetFront() const {
+    return Front;
+}
+
+glm::vec3 Camera::GetRight() const {
+    return Right;
 }
 
 void Camera::UpdateCameraVectors() {
