@@ -3,7 +3,8 @@ from nora_contrib.player_controller import PlayerController
 
 
 class FPSDisplayComponent(Component):
-    last_fps = 0.0
+    def start(self):
+        self.last_fps = 0.0
 
     def update(self):
         if self.last_fps != Time.fps:
@@ -23,12 +24,12 @@ def initialize() -> None:
     fps_component.set_owner(e)
     e.add_component(fps_component)
 
-    camera = Camera()
-    camera.set_owner(e)
-    e.add_component(camera)
-
     player_controller = PlayerController()
     player_controller.set_owner(e)
     e.add_component(player_controller)
+
+    camera = Camera()
+    camera.set_owner(e)
+    e.add_component(camera)
 
     Window.scene.add_entity(e)

@@ -2,17 +2,6 @@ from nora import Component, Camera, Time, Input, Key
 
 
 class PlayerController(Component):
-    last_x: float
-    last_y: float
-    first_mouse: bool
-    movement_speed: float
-    mouse_sensitivity: float
-    constrain_pitch: bool
-    min_pitch: float
-    max_pitch: float
-    min_zoom: float
-    max_zoom: float
-
     def start(self) -> None:
         self.last_x = 0.0
         self.last_y = 0.0
@@ -56,6 +45,9 @@ class PlayerController(Component):
 
         xoffset *= self.mouse_sensitivity
         yoffset *= self.mouse_sensitivity
+
+        self.last_x = xpos
+        self.last_y = ypos
 
         self.camera.yaw += xoffset
         self.camera.pitch += yoffset
