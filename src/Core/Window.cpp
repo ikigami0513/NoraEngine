@@ -2,7 +2,7 @@
 #include "Core/Time.hpp"
 #include "World/Camera.hpp"
 #include "World/Entity.hpp"
-#include "World/Mesh/CuboidMesh.hpp"
+#include "World/Mesh/MeshComponent.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -92,10 +92,11 @@ void Window::Render() {
         // camera/view transformation
         glm::mat4 view = camera->GetViewMatrix();
 
-        // render boxes
-        std::vector<Entity*> cuboidEntities = m_scene.GetEntitiesWithComponent<CuboidMesh>();
-        for (auto entity : cuboidEntities) {
-            entity->GetComponent<CuboidMesh>()->Render(*m_shader, view, projection);
+        // render meshes
+        std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<MeshComponent>();
+        for (auto entity : meshedEntities) {
+            MeshComponent* mesh = entity->GetComponent<MeshComponent>();
+            mesh->Render(*m_shader, view, projection);
         }
     }
 }

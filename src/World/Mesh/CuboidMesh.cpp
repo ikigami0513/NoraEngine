@@ -87,14 +87,6 @@ void CuboidMesh::Start() {
     SetupMesh();
 }
 
-void CuboidMesh::SetTexture(std::shared_ptr<Texture> texture) {
-    m_texture = std::move(texture);
-}
-
-Texture CuboidMesh::GetTexture() {
-    return *m_texture;
-}
-
 void CuboidMesh::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
     shader.Use();
     m_texture->Bind(0);

@@ -12,6 +12,42 @@ class FPSDisplayComponent(Component):
             self.last_fps = Time.fps
 
 
+def init_cuboid(t: Texture):
+    cube_positions = [
+        Vec3(0.0, 0.0, 0.0),
+        Vec3(2.0, 5.0, -15.0),
+        Vec3(-1.5, -2.2, -2.5),
+        Vec3(-3.8, -2.0, -12.3),
+        Vec3(2.4, -0.4, -3.5),
+        Vec3(-1.7, 3.0, -7.5),
+        Vec3(1.3, -2.0, -2.5),
+        Vec3(1.5,  2.0, -2.5),
+        Vec3(1.5, 0.2, -1.5),
+        Vec3(-1.3, 1.0, -1.5)
+    ]
+
+    for i in range(len(cube_positions)):
+        cube_entity = Entity()
+        cube_entity.transform.local_position = cube_positions[i]
+        angle = 20 * i
+        cube_entity.transform.local_rotation = Vec3(angle, angle, angle)
+        cube_component = CuboidMesh()
+        cube_component.texture = t
+        cube_component.set_owner(cube_entity)
+        cube_entity.add_component(cube_component)
+        Window.scene.add_entity(cube_entity)
+
+
+def init_sphere(t: Texture):
+    s_entity = Entity()
+    s_entity.transform.local_position = Vec3(5.0, 5.0, 5.0)
+    sphere_component = SphereMesh()
+    sphere_component.texture = t
+    sphere_component.set_owner(s_entity)
+    s_entity.add_component(sphere_component)
+    Window.scene.add_entity(s_entity)
+
+
 def initialize() -> None:
     Window.set_title("Cuboid 3d space - Nora Engine Example")
     Window.set_size(1920, 1080)
@@ -34,25 +70,6 @@ def initialize() -> None:
 
     Window.scene.add_entity(e)
 
-    cube_positions = [
-        Vec3(0.0, 0.0, 0.0),
-        Vec3(2.0, 5.0, -15.0),
-        Vec3(-1.5, -2.2, -2.5),
-        Vec3(-3.8, -2.0, -12.3),
-        Vec3(2.4, -0.4, -3.5),
-        Vec3(-1.7, 3.0, -7.5),
-        Vec3(1.3, -2.0, -2.5),
-        Vec3(1.5,  2.0, -2.5),
-        Vec3(1.5, 0.2, -1.5),
-        Vec3(-1.3, 1.0, -1.5)
-    ]
-
     t = Texture("../resources/textures/container.jpg")
-    for i in range(len(cube_positions)):
-        cube_entity = Entity()
-        cube_entity.transform.local_position = cube_positions[i]
-        cube_component = CuboidMesh()
-        cube_component.texture = t
-        cube_component.set_owner(cube_entity)
-        cube_entity.add_component(cube_component)
-        Window.scene.add_entity(cube_entity)
+    init_cuboid(t)
+    init_sphere(t)

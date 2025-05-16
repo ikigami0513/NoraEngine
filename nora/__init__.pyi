@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import TypeVar, List, Tuple
+from abc import ABC
 
 
 _T = TypeVar('_T')
@@ -308,8 +309,13 @@ class Texture:
     def __init__(self, path: str, flip_vertically: bool = False): ...
 
 
-class CuboidMesh(Component):
+class MeshComponent(ABC, Component):
     texture: Texture
-    
+
+
+class CuboidMesh(MeshComponent):
     def __init__(self): ...
+
+class SphereMesh(MeshComponent):
+    def __init__(self, sector_count: int = 36, stack_count: int = 18): ...
     

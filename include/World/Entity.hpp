@@ -68,14 +68,13 @@ class Entity {
 
                 if (PythonComponentWrapper* wrapper = dynamic_cast<PythonComponentWrapper*>(comp_ptr.get())) {
                     py::object py_obj = wrapper->PyComponent();
-                    if (py_obj) {
-                        if (py::isinstance(py_obj, py::type::of<T>())) {
-                            try {
+                    if (py_obj && !py_obj.is_none()) {
+                        try {
+                            if (py::isinstance<T>(py_obj)) {
                                 return py_obj.cast<T*>();
                             }
-                            catch (const py::cast_error& e) {
-                                std::cerr <<"Pybind11 cast error in Entity::GetComponent<T>: " << e.what() << std::endl;
-                            }
+                        } catch (const py::cast_error& e) {
+                            std::cerr << "Pybind11 cast error in Entity::GetComponent<T>: " << e.what() << std::endl;
                         }
                     }
                 }

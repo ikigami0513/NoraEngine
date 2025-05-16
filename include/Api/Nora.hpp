@@ -10,6 +10,7 @@
 #include "World/Camera.hpp"
 #include "World/Transform.hpp"
 #include "World/Mesh/CuboidMesh.hpp"
+#include "World/Mesh/SphereMesh.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Api/PythonComponentWrapper.hpp"
@@ -269,7 +270,12 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         py::class_<Texture, std::shared_ptr<Texture>>(m, "Texture")
             .def(py::init<const std::string&, bool>(), py::arg("path"), py::arg("flip_vertically") = false);
 
-        py::class_<CuboidMesh, Component, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
-            .def(py::init<>())
-            .def_property("texture", &CuboidMesh::GetTexture, &CuboidMesh::SetTexture);
+        py::class_<MeshComponent, Component, std::shared_ptr<MeshComponent>>(m, "MeshComponent")
+            .def_property("texture", &MeshComponent::GetTexture, &MeshComponent::SetTexture);
+
+        py::class_<CuboidMesh, MeshComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
+            .def(py::init<>());
+
+        py::class_<SphereMesh, MeshComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
+            .def(py::init<unsigned int, unsigned int>(), py::arg("sector_count") = 36, py::arg("stack_count") = 18);
 }

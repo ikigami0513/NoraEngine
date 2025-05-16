@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Lib/mingw64/include/python3.9",
+                "C:/Users/ikiga/AppData/Local/Programs/Python/Python313/include",
                 "C:/Lib/mingw64/include/"
             ],
             "defines": [
