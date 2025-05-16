@@ -18,7 +18,7 @@ option(PRODUCTION_BUILD "Make this a production build" OFF)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) #link time optimization
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE) #link time optimization
 
 if(MSVC) 
 add_compile_options(/arch:AVX2) #make sure SIMD optimizations take place

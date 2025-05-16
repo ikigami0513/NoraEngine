@@ -2,6 +2,7 @@
 #include "Core/Time.hpp"
 #include "World/Camera.hpp"
 #include "World/Entity.hpp"
+#include "World/Mesh/CuboidMesh.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,8 +25,6 @@ Window::Window() {
 }
 
 Window::~Window() {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
     glfwTerminate();
 }
 
@@ -67,30 +66,6 @@ void Window::InitGLAD() {
 
 void Window::Setup() {
     m_shader = std::make_unique<Shader>("../resources/shaders/vert.glsl", "../resources/shaders/frag.glsl");
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // color attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    texture1 = std::make_unique<Texture>("../resources/textures/container.jpg");
-    texture2 = std::make_unique<Texture>("../resources/textures/awesomeface.png", true);
-
-    m_shader->Use();
-    m_shader->SetInt("texture1", 0);
-    m_shader->SetInt("texture2", 1);
 }
 
 void Window::ProcessInput() {
@@ -110,49 +85,30 @@ void Window::Render() {
     std::vector<Entity*> cameraEntities = m_scene.GetEntitiesWithComponent<Camera>();
     if (!cameraEntities.empty()) {
         Camera* camera = cameraEntities[0]->GetComponent<Camera>();
-
-        // bind textures on corresponding texture units
-        texture1->Bind(0);
-        texture2->Bind(1);
-
-        // activate shader
-        m_shader->Use();
         
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)m_width / (float)m_height, 0.1f, 100.0f);
-        m_shader->SetMat4("projection", projection);
 
         // camera/view transformation
         glm::mat4 view = camera->GetViewMatrix();
-        m_shader->SetMat4("view", view);
 
         // render boxes
-        glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++) {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f); // maje sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            m_shader->SetMat4("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+        std::vector<Entity*> cuboidEntities = m_scene.GetEntitiesWithComponent<CuboidMesh>();
+        for (auto entity : cuboidEntities) {
+            entity->GetComponent<CuboidMesh>()->Render(*m_shader, view, projection);
         }
-        
-        glBindVertexArray(0);
     }
 }
 
 void Window::Shutdown() {
     m_game = std::make_unique<py::object>(); // Reset to null object
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteVertexArrays(1, &VBO);
 }
 
 void Window::Run() {
     InitGLFW();
     CreateWindow();
     InitGLAD();
+    glfwSwapInterval(0);
     glEnable(GL_DEPTH_TEST);
     Setup();
 

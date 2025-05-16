@@ -86,7 +86,12 @@ class Entity {
 
     void Start() {
         for (auto& component: m_components) {
-            component->Start();
+            try {
+                component->Start();
+            }
+            catch (const py::cast_error& e) {
+                std::cerr << "Error while calling component Start" << std::endl;
+            }
         }
 
         for (auto& child : m_children) {
@@ -105,7 +110,14 @@ class Entity {
         }
 
         for (auto& component : m_components) {
-            component->Update();
+            for (auto& component: m_components) {
+                try {
+                    component->Update();
+                }
+                catch (const py::cast_error& e) {
+                    std::cerr << "Error while calling component Update" << std::endl;
+                }
+            }
         }
 
         // Update children

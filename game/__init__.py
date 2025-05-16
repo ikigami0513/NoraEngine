@@ -13,8 +13,8 @@ class FPSDisplayComponent(Component):
 
 
 def initialize() -> None:
-    Window.set_title("Hello Triangle - Nora Engine Example")
-    Window.set_size(800, 600)
+    Window.set_title("Cuboid 3d space - Nora Engine Example")
+    Window.set_size(1920, 1080)
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
 
     e = Entity()
@@ -33,3 +33,26 @@ def initialize() -> None:
     e.add_component(camera)
 
     Window.scene.add_entity(e)
+
+    cube_positions = [
+        Vec3(0.0, 0.0, 0.0),
+        Vec3(2.0, 5.0, -15.0),
+        Vec3(-1.5, -2.2, -2.5),
+        Vec3(-3.8, -2.0, -12.3),
+        Vec3(2.4, -0.4, -3.5),
+        Vec3(-1.7, 3.0, -7.5),
+        Vec3(1.3, -2.0, -2.5),
+        Vec3(1.5,  2.0, -2.5),
+        Vec3(1.5, 0.2, -1.5),
+        Vec3(-1.3, 1.0, -1.5)
+    ]
+
+    t = Texture("../resources/textures/container.jpg")
+    for i in range(len(cube_positions)):
+        cube_entity = Entity()
+        cube_entity.transform.local_position = cube_positions[i]
+        cube_component = CuboidMesh()
+        cube_component.texture = t
+        cube_component.set_owner(cube_entity)
+        cube_entity.add_component(cube_component)
+        Window.scene.add_entity(cube_entity)

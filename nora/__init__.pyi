@@ -302,3 +302,14 @@ class Scene:
 
     def add_entity(entity: Entity) -> None: ...
     def get_root_entities() -> List[Entity]: ...
+
+
+class Texture:
+    def __init__(self, path: str, flip_vertically: bool = False): ...
+
+
+class CuboidMesh(Component):
+    texture: Texture
+    
+    def __init__(self): ...
+    

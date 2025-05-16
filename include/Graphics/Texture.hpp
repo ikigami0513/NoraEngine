@@ -10,6 +10,7 @@ class Texture {
 
         Texture(const std::string& path, bool hasAlpha = false);
         void Bind(unsigned int unit = 0) const;
+        void Unbind(unsigned int unit = 0) const;
 };
 
 #endif

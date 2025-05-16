@@ -9,6 +9,7 @@
 #include "World/Component.hpp"
 #include "World/Camera.hpp"
 #include "World/Transform.hpp"
+#include "World/Mesh/CuboidMesh.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Api/PythonComponentWrapper.hpp"
@@ -47,7 +48,6 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
             s += ">";
             return s;
         });
-        // Suppression de la tentative d'exposer via __getitem__ avec py::array_t
 
     py::class_<Transform>(m, "Transform")
         .def(py::init<>())
@@ -265,4 +265,11 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_property_readonly("transform", [](const Entity& self) -> const Transform& {
             return self.GetTransform();
         });
+
+        py::class_<Texture, std::shared_ptr<Texture>>(m, "Texture")
+            .def(py::init<const std::string&, bool>(), py::arg("path"), py::arg("flip_vertically") = false);
+
+        py::class_<CuboidMesh, Component, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
+            .def(py::init<>())
+            .def_property("texture", &CuboidMesh::GetTexture, &CuboidMesh::SetTexture);
 }
