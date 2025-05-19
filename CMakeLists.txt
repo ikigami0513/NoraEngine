@@ -36,15 +36,13 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 
-add_subdirectory(thirdparty/glfw-3.3.2)			#window oppener
-add_subdirectory(thirdparty/glad)				#opengl loader
-add_subdirectory(thirdparty/stb_image)			#loading immaged
-add_subdirectory(thirdparty/stb_truetype)		#loading ttf files
-#add_subdirectory(thirdparty/enet-1.3.17)		#networking
-add_subdirectory(thirdparty/raudio)				#audio
-add_subdirectory(thirdparty/glm)				#math
-add_subdirectory(thirdparty/imgui-docking)		#ui
-add_subdirectory(thirdparty/pybind11-master)
+add_subdirectory(thirdparty/glfw-3.3.2)			# window oppener
+add_subdirectory(thirdparty/glad)				# opengl loader
+add_subdirectory(thirdparty/stb_image)			# loading image
+#add_subdirectory(thirdparty/enet-1.3.17)		# networking
+add_subdirectory(thirdparty/raudio)				# audio
+add_subdirectory(thirdparty/glm)				# math
+add_subdirectory(thirdparty/pybind11-master)    # python binding
 add_subdirectory(thirdparty/freetype-2.13.3)    # text rendering
 
 
