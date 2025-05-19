@@ -85,3 +85,11 @@ def initialize() -> None:
     t = Texture("../resources/textures/container.jpg")
     init_cuboid(t)
     init_sphere(t)
+
+    ce = Entity()
+    ce.transform.local_position = Vec3(4.0, 4.0, 4.0)
+    capsule = CapsuleMesh()
+    capsule.texture = t
+    capsule.set_owner(ce)
+    ce.add_component(capsule)
+    Window.scene.add_entity(ce)
