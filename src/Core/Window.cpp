@@ -109,6 +109,10 @@ void Window::Render() {
         }
 
         // render gui
+        m_guiShader->Use();
+        glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
+        m_guiShader->SetMat4("projection", ortho_projection);
+
         std::vector<Entity*> guiEntities = m_scene.GetEntitiesWithComponent<GuiComponent>();
         for (auto entity : guiEntities) {
             GuiComponent* gui = entity->GetComponent<GuiComponent>();

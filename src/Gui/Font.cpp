@@ -7,7 +7,9 @@ Font::Font(const std::string& fontPath, unsigned int fontSize) {
     }
 
     FT_Set_Pixel_Sizes(face, 0, fontSize);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+    GLint previousAlignment;
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousAlignment);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     for (unsigned char c = 0; c < 128; ++c) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
@@ -44,6 +46,7 @@ Font::Font(const std::string& fontPath, unsigned int fontSize) {
         Characters.insert(std::make_pair(c, character));
     }
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, previousAlignment);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

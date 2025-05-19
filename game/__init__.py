@@ -8,8 +8,7 @@ class FPSDisplayComponent(Component):
 
     def update(self):
         if self.last_fps != Time.fps:
-            print(str(Time.fps))
-            self.owner.get_component(Text).text = str(Time.fps)
+            self.owner.get_component(Text).text = f"{Time.fps} FPS"
             self.last_fps = Time.fps
 
 
@@ -51,15 +50,11 @@ def init_sphere(t: Texture):
 
 def initialize() -> None:
     Window.set_title("Cuboid 3d space - Nora Engine Example")
-    Window.set_size(1920, 1080)
+    Window.set_size(800, 600)
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
 
     e = Entity()
     e.transform.local_position = Vec3(0.0, 0.0, 3.0)
-
-    fps_component = FPSDisplayComponent()
-    fps_component.set_owner(e)
-    e.add_component(fps_component)
 
     player_controller = PlayerController()
     player_controller.set_owner(e)
@@ -69,15 +64,23 @@ def initialize() -> None:
     camera.set_owner(e)
     e.add_component(camera)
 
-    font = Font("../resources/fonts/Antonio-Regular.ttf")
+    Window.scene.add_entity(e)
+
+    fps_entity = Entity()
+    fps_entity.transform.local_position = Vec3(10.0, 570.0, 0.0)
+    fps_component = FPSDisplayComponent()
+    fps_component.set_owner(fps_entity)
+    fps_entity.add_component(fps_component)
+
+    font = Font("../resources/fonts/Antonio-Regular.ttf", 16)
     fps_text = Text()
     fps_text.font = font
-    fps_text.color = Color(0.5, 0.8, 0.2)
-    fps_text.text = str(Time.fps)
-    fps_text.set_owner(e)
-    e.add_component(fps_text)
+    fps_text.color = Color(1.0, 1.0, 1.0)
+    fps_text.text = f"{Time.fps} FPS"
+    fps_text.set_owner(fps_entity)
+    fps_entity.add_component(fps_text)
 
-    Window.scene.add_entity(e)
+    Window.scene.add_entity(fps_entity)
 
     t = Texture("../resources/textures/container.jpg")
     init_cuboid(t)

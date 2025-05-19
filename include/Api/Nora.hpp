@@ -290,11 +290,11 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         py::class_<Text, GuiComponent, std::shared_ptr<Text>>(m, "Text")
             .def(py::init<>())
             .def_property("font",
-                [](Text& self) -> std::shared_ptr<Font> {
-                    return self.font ? std::shared_ptr<Font>(self.font.get(), [](Font*) {}) : nullptr;
+                [](Text& self) -> std::shared_ptr<Font> { // Getter
+                    return self.font; // Retourne directement le shared_ptr
                 },
-                [](Text& self, std::shared_ptr<Font> new_font) {
-                    self.font = std::make_unique<Font>(*new_font);
+                [](Text& self, std::shared_ptr<Font> new_font) { // Setter
+                    self.font = new_font; // Assignation directe du shared_ptr
                 },
                 "The font used by the text component.")
             .def_property("text",

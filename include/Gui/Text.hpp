@@ -18,7 +18,7 @@ class Text: public GuiComponent {
         void Start() override;
         void Render(Shader& shader) override;
 
-        std::unique_ptr<Font> font;
+        std::shared_ptr<Font> font;
         std::string text;
         Color color;
 
