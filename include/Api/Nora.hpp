@@ -4,6 +4,7 @@
 #include "Core/Time.hpp"
 #include "Core/Input.hpp"
 #include "Core/Key.hpp"
+#include "Core/Debug.hpp"
 #include "Graphics/Color.hpp"
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
@@ -22,6 +23,9 @@
 namespace py = pybind11;
 
 PYBIND11_EMBEDDED_MODULE(nora, m) {
+    py::class_<Debug>(m, "Debug")
+        .def_static("log", &Debug::Log, py::arg("message"), "Logs a message to the console with a timestamp.");
+
     py::class_<glm::vec3>(m, "Vec3")
         .def(py::init<float, float, float>(), py::arg("x") = 0.0f, py::arg("y") = 0.0f, py::arg("z") = 0.0f)
         .def_readwrite("x", &glm::vec3::x)

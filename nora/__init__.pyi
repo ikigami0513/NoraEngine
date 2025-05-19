@@ -6,6 +6,11 @@ from abc import ABC
 _T = TypeVar('_T')
 
 
+class Debug:
+    @staticmethod
+    def log(message: str): ...
+
+
 class Vec3:
     """
     Represents a 3D vector.
