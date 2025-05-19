@@ -309,13 +309,28 @@ class Texture:
     def __init__(self, path: str, flip_vertically: bool = False): ...
 
 
-class MeshComponent(ABC, Component):
+class Font:
+    def __init__(self, font_path: str, font_size: int = 48): ...
+
+
+class RenderComponent(ABC, Component):
     texture: Texture
 
 
-class CuboidMesh(MeshComponent):
+class CuboidMesh(RenderComponent):
     def __init__(self): ...
 
-class SphereMesh(MeshComponent):
+
+class SphereMesh(RenderComponent):
     def __init__(self, sector_count: int = 36, stack_count: int = 18): ...
+
+
+class GuiComponent(ABC, Component): ...
     
+
+class Text(GuiComponent):
+    font: Font
+    text: str
+    color: Color
+
+    def __init__(self): ...

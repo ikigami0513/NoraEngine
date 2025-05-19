@@ -1,7 +1,7 @@
 #ifndef CUBOID_MESH_HPP
 #define CUBOID_MESH_HPP
 
-#include "World/Mesh/MeshComponent.hpp"
+#include "World/Mesh/RenderComponent.hpp"
 #include "World/Component.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-class CuboidMesh : public MeshComponent {
+class CuboidMesh : public RenderComponent {
     public:
         CuboidMesh();
         ~CuboidMesh();

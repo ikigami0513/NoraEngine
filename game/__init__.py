@@ -8,7 +8,8 @@ class FPSDisplayComponent(Component):
 
     def update(self):
         if self.last_fps != Time.fps:
-            print(f"FPS: {int(Time.fps)}")
+            print(str(Time.fps))
+            self.owner.get_component(Text).text = str(Time.fps)
             self.last_fps = Time.fps
 
 
@@ -67,6 +68,14 @@ def initialize() -> None:
     camera = Camera()
     camera.set_owner(e)
     e.add_component(camera)
+
+    font = Font("../resources/fonts/Antonio-Regular.ttf")
+    fps_text = Text()
+    fps_text.font = font
+    fps_text.color = Color(0.5, 0.8, 0.2)
+    fps_text.text = str(Time.fps)
+    fps_text.set_owner(e)
+    e.add_component(fps_text)
 
     Window.scene.add_entity(e)
 

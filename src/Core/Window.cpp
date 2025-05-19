@@ -2,7 +2,8 @@
 #include "Core/Time.hpp"
 #include "World/Camera.hpp"
 #include "World/Entity.hpp"
-#include "World/Mesh/MeshComponent.hpp"
+#include "World/Mesh/RenderComponent.hpp"
+#include "Gui/GuiComponent.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -64,8 +65,16 @@ void Window::InitGLAD() {
     }
 }
 
+void Window::InitFreeType() {
+    // All functions return a value different than 0 whenever an error occured
+    if (FT_Init_FreeType(&m_ft)) {
+        throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
+    }
+}
+
 void Window::Setup() {
-    m_shader = std::make_unique<Shader>("../resources/shaders/vert.glsl", "../resources/shaders/frag.glsl");
+    m_shader = std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl");
+    m_guiShader = std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl");
 }
 
 void Window::ProcessInput() {
@@ -93,10 +102,17 @@ void Window::Render() {
         glm::mat4 view = camera->GetViewMatrix();
 
         // render meshes
-        std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<MeshComponent>();
+        std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<RenderComponent>();
         for (auto entity : meshedEntities) {
-            MeshComponent* mesh = entity->GetComponent<MeshComponent>();
+            RenderComponent* mesh = entity->GetComponent<RenderComponent>();
             mesh->Render(*m_shader, view, projection);
+        }
+
+        // render gui
+        std::vector<Entity*> guiEntities = m_scene.GetEntitiesWithComponent<GuiComponent>();
+        for (auto entity : guiEntities) {
+            GuiComponent* gui = entity->GetComponent<GuiComponent>();
+            gui->Render(*m_guiShader);
         }
     }
 }
@@ -109,6 +125,7 @@ void Window::Run() {
     InitGLFW();
     CreateWindow();
     InitGLAD();
+    InitFreeType();
     glfwSwapInterval(0);
     glEnable(GL_DEPTH_TEST);
     Setup();
@@ -201,4 +218,8 @@ Scene& Window::GetScene() {
 
 void Window::SetScene(const Scene& scene) {
     m_scene = scene;
+}
+
+FT_Library Window::FT() {
+    return m_ft;
 }

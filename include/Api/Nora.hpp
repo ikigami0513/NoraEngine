@@ -11,6 +11,9 @@
 #include "World/Transform.hpp"
 #include "World/Mesh/CuboidMesh.hpp"
 #include "World/Mesh/SphereMesh.hpp"
+#include "Gui/Font.hpp"
+#include "Gui/GuiComponent.hpp"
+#include "Gui/Text.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Api/PythonComponentWrapper.hpp"
@@ -270,12 +273,36 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         py::class_<Texture, std::shared_ptr<Texture>>(m, "Texture")
             .def(py::init<const std::string&, bool>(), py::arg("path"), py::arg("flip_vertically") = false);
 
-        py::class_<MeshComponent, Component, std::shared_ptr<MeshComponent>>(m, "MeshComponent")
-            .def_property("texture", &MeshComponent::GetTexture, &MeshComponent::SetTexture);
+        py::class_<Font, std::shared_ptr<Font>>(m, "Font")
+            .def(py::init<const std::string&, unsigned int>(), py::arg("font_path"), py::arg("font_size") = 48);
 
-        py::class_<CuboidMesh, MeshComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
+        py::class_<RenderComponent, Component, std::shared_ptr<RenderComponent>>(m, "RenderComponent")
+            .def_property("texture", &RenderComponent::GetTexture, &RenderComponent::SetTexture);
+
+        py::class_<CuboidMesh, RenderComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
             .def(py::init<>());
 
-        py::class_<SphereMesh, MeshComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
+        py::class_<SphereMesh, RenderComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
             .def(py::init<unsigned int, unsigned int>(), py::arg("sector_count") = 36, py::arg("stack_count") = 18);
+
+        py::class_<GuiComponent, Component, std::shared_ptr<GuiComponent>>(m, "GuiComponent");
+
+        py::class_<Text, GuiComponent, std::shared_ptr<Text>>(m, "Text")
+            .def(py::init<>())
+            .def_property("font",
+                [](Text& self) -> std::shared_ptr<Font> {
+                    return self.font ? std::shared_ptr<Font>(self.font.get(), [](Font*) {}) : nullptr;
+                },
+                [](Text& self, std::shared_ptr<Font> new_font) {
+                    self.font = std::make_unique<Font>(*new_font);
+                },
+                "The font used by the text component.")
+            .def_property("text",
+                [](const Text& self) { return self.text; },
+                [](Text& self, const std::string& new_text) { self.text = new_text; },
+                "The content of the text.")
+            .def_property("color",
+                [](const Text& self) { return self.color; },
+                [](Text& self, const Color& new_color) { self.color = new_color; },
+                "The color of the text.");
 }

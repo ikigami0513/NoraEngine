@@ -1,11 +1,15 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
+#include <iostream>
+#include <string>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <pybind11/embed.h>
-#include <iostream>
-#include <string>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "Graphics/Color.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
@@ -33,6 +37,8 @@ class Window {
         Scene& GetScene();
         void SetScene(const Scene& scene);
 
+        FT_Library FT();
+
         Color BackgroundColor;
 
     private:
@@ -42,12 +48,14 @@ class Window {
         void InitGLFW();
         void CreateWindow();
         void InitGLAD();
+        void InitFreeType();
         void Setup();
         void ProcessInput();
         void Update();
         void Render();
         void Shutdown();
 
+        FT_Library m_ft;
         Scene m_scene;
 
         void OnResize(int width, int height);
@@ -65,6 +73,7 @@ class Window {
 
         std::unique_ptr<py::object> m_game;
         std::unique_ptr<Shader> m_shader;
+        std::unique_ptr<Shader> m_guiShader;
 };
 
 #endif

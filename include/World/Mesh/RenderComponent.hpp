@@ -8,9 +8,9 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class MeshComponent : public Component {
+class RenderComponent : public Component {
     public:
-        virtual ~MeshComponent() = default;
+        virtual ~RenderComponent() = default;
 
         virtual void Start() override = 0;
         virtual void Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) = 0;
