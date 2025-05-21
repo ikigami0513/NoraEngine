@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <sstream>
 
 const char* Debug::COLOR_RESET = "\033[0m";
 const char* Debug::COLOR_INFO = "\033[36m"; // Cyan

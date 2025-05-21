@@ -1,5 +1,5 @@
-#ifndef MESH_COMPONENT_HPP
-#define MESH_COMPONENT_HPP
+#ifndef RENDER_COMPONENT_HPP
+#define RENDER_COMPONENT_HPP
 
 #include "World/Component.hpp"
 #include "Graphics/Shader.hpp"
@@ -22,6 +22,8 @@ class RenderComponent : public Component {
         Texture GetTexture() {
             return *m_texture;
         }
+
+        virtual std::string ShaderType() = 0;
 
     protected:
         std::shared_ptr<Texture> m_texture;

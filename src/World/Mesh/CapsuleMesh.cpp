@@ -250,3 +250,7 @@ void CapsuleMesh::Render(Shader& shader, const glm::mat4& viewMatrix, const glm:
         m_texture->Unbind(0);
     }
 }
+
+std::string CapsuleMesh::ShaderType() {
+    return "mesh";
+}

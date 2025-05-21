@@ -72,8 +72,6 @@ class Window {
         int m_height = 600;
 
         std::unique_ptr<py::object> m_game;
-        std::unique_ptr<Shader> m_shader;
-        std::unique_ptr<Shader> m_guiShader;
 };
 
 #endif

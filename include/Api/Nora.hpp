@@ -13,6 +13,7 @@
 #include "World/Mesh/CuboidMesh.hpp"
 #include "World/Mesh/SphereMesh.hpp"
 #include "World/Mesh/CapsuleMesh.hpp"
+#include "World/Mesh/3DModel/Model.hpp"
 #include "Gui/Font.hpp"
 #include "Gui/GuiComponent.hpp"
 #include "Gui/Text.hpp"
@@ -297,6 +298,17 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 py::init<float, float, unsigned int, unsigned int, unsigned int>(),
                 py::arg("radius") = 0.5f, py::arg("cylinder_height") = 1.0f, py::arg("sector_count") = 36,
                 py::arg("hemisphere_stacks") = 18, py::arg("cylinder_stacks") = 10
+            );
+
+        py::class_<Model, RenderComponent, std::shared_ptr<Model>>(m, "Model")
+            .def(py::init<std::string>(), py::arg("path") = "")
+            .def_property("path", 
+                [](Model& self) -> std::string {
+                    return self.path;
+                },
+                [](Model& self, std::string new_path) {
+                    self.path = new_path;
+                }
             );
 
         py::class_<GuiComponent, Component, std::shared_ptr<GuiComponent>>(m, "GuiComponent");

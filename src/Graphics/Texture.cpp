@@ -1,14 +1,14 @@
 #include "Graphics/Texture.hpp"
 #include <iostream>
 
-Texture::Texture(const std::string& path, bool hasAlpha) : ID(0) {
+Texture::Texture(const std::string& path, bool hasAlpha, std::string type) : ID(0), m_path(path), m_type(type) {
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
@@ -40,4 +40,12 @@ void Texture::Bind(unsigned int unit) const {
 void Texture::Unbind(unsigned int unit) const {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+std::string Texture::Path() {
+    return m_path;
+}
+
+std::string Texture::Type() {
+    return m_type;
 }

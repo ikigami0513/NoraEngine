@@ -343,6 +343,12 @@ class CapsuleMesh(RenderComponent):
     ): ...
 
 
+class Model(RenderComponent):
+    def __init__(self, path: str = ""): ...
+
+    path: str
+
+
 class GuiComponent(ABC, Component): ...
     
 

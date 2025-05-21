@@ -19,6 +19,7 @@ class CuboidMesh : public RenderComponent {
 
         void Start() override;
         void Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+        std::string ShaderType() override;
 
     private:
         void SetupMesh();

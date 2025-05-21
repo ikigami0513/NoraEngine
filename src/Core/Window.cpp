@@ -1,5 +1,6 @@
 #include "Core/Window.hpp"
 #include "Core/Time.hpp"
+#include "Core/AssetsManager.hpp"
 #include "World/Camera.hpp"
 #include "World/Entity.hpp"
 #include "World/Mesh/RenderComponent.hpp"
@@ -73,8 +74,9 @@ void Window::InitFreeType() {
 }
 
 void Window::Setup() {
-    m_shader = std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl");
-    m_guiShader = std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl");
+    AssetsManager::AddShader("mesh", std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl"));
+    AssetsManager::AddShader("gui", std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl"));
+    AssetsManager::AddShader("3d_model", std::make_unique<Shader>("../resources/shaders/3d_model/vert.glsl", "../resources/shaders/3d_model/frag.glsl"));
 }
 
 void Window::ProcessInput() {
@@ -105,18 +107,21 @@ void Window::Render() {
         std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<RenderComponent>();
         for (auto entity : meshedEntities) {
             RenderComponent* mesh = entity->GetComponent<RenderComponent>();
-            mesh->Render(*m_shader, view, projection);
+            Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
+            mesh->Render(*shader, view, projection);
         }
 
         // render gui
-        m_guiShader->Use();
         glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
-        m_guiShader->SetMat4("projection", ortho_projection);
+        Shader* guiShader = AssetsManager::GetShader("gui");
+        guiShader->Use();
+        guiShader->SetMat4("projection", ortho_projection);
 
         std::vector<Entity*> guiEntities = m_scene.GetEntitiesWithComponent<GuiComponent>();
         for (auto entity : guiEntities) {
             GuiComponent* gui = entity->GetComponent<GuiComponent>();
-            gui->Render(*m_guiShader);
+            Shader* shader = AssetsManager::GetShader(gui->ShaderType());
+            gui->Render(*shader);
         }
     }
 }

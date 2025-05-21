@@ -44,6 +44,11 @@ add_subdirectory(thirdparty/raudio)				# audio
 add_subdirectory(thirdparty/glm)				# math
 add_subdirectory(thirdparty/pybind11-master)    # python binding
 add_subdirectory(thirdparty/freetype-2.13.3)    # text rendering
+add_subdirectory(thirdparty/assimp-5.4.3)       # model loading
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(assimp PRIVATE -Wno-error)
+endif()
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -96,6 +101,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 
 #enet not working yet on linux for some reason
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw 
-	glad stb_image enet raudio freetype)
+	glad stb_image enet raudio freetype assimp)
 
 
