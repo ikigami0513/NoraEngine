@@ -7,3 +7,4 @@ CMakeSettings.json
 Makefile
 venv/
 *.pyc
+/.vscode/
