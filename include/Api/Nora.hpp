@@ -6,6 +6,7 @@
 #include "Core/Key.hpp"
 #include "Core/Debug.hpp"
 #include "Graphics/Color.hpp"
+#include "Graphics/Sprite.hpp"
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
 #include "World/Camera.hpp"
@@ -331,4 +332,7 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 [](const Text& self) { return self.color; },
                 [](Text& self, const Color& new_color) { self.color = new_color; },
                 "The color of the text.");
+
+        py::class_<Sprite, RenderComponent, std::shared_ptr<Sprite>>(m, "Sprite")
+            .def(py::init<>());
 }

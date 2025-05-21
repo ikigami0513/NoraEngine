@@ -358,3 +358,7 @@ class Text(GuiComponent):
     color: Color
 
     def __init__(self): ...
+
+
+class Sprite(RenderComponent):
+    def __init__(self): ...
