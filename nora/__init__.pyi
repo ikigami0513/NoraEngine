@@ -8,7 +8,13 @@ _T = TypeVar('_T')
 
 class Debug:
     @staticmethod
-    def log(message: str): ...
+    def info(message: str): ...
+
+    @staticmethod
+    def warning(message: str): ...
+
+    @staticmethod
+    def error(message: str): ...
 
 
 class Vec3:

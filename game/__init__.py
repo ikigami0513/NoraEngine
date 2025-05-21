@@ -8,7 +8,9 @@ class FPSDisplayComponent(Component):
 
     def update(self):
         if self.last_fps != Time.fps:
-            Debug.log(f"{Time.fps} FPS")
+            Debug.info(f"{Time.fps} FPS")
+            Debug.warning(f"{Time.fps} FPS")
+            Debug.error(f"{Time.fps} FPS")
             self.owner.get_component(Text).text = f"{Time.fps} FPS"
             self.last_fps = Time.fps
 

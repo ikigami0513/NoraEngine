@@ -24,7 +24,9 @@ namespace py = pybind11;
 
 PYBIND11_EMBEDDED_MODULE(nora, m) {
     py::class_<Debug>(m, "Debug")
-        .def_static("log", &Debug::Log, py::arg("message"), "Logs a message to the console with a timestamp.");
+        .def_static("info", &Debug::Info, py::arg("message"))
+        .def_static("warning", &Debug::Warning, py::arg("message"))
+        .def_static("error", &Debug::Error, py::arg("message"));
 
     py::class_<glm::vec3>(m, "Vec3")
         .def(py::init<float, float, float>(), py::arg("x") = 0.0f, py::arg("y") = 0.0f, py::arg("z") = 0.0f)
