@@ -18,6 +18,11 @@
 
 namespace py = pybind11;
 
+enum class WindowContext {
+    Context2D,
+    Context3D
+};
+
 class Window {
     public:
         static Window& GetInstance();
@@ -40,6 +45,7 @@ class Window {
         FT_Library FT();
 
         Color BackgroundColor;
+        WindowContext m_context;
 
     private:
         Window();

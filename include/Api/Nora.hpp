@@ -99,6 +99,11 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_property_readonly_static("delta_time", [](py::object) { return Time::DeltaTime(); }, "Delta time between frames.")
         .def_property_readonly_static("fps", [](py::object) { return Time::FPS(); }, "Current frames per second.");
 
+    py::enum_<WindowContext>(m, "WindowContext")
+        .value("Context2D", WindowContext::Context2D)
+        .value("Context3D", WindowContext::Context3D)
+        .export_values();
+
     py::class_<Window>(m, "Window", py::module_local())
         .def_property_static(
             "background_color",
@@ -109,6 +114,15 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 Window::GetInstance().BackgroundColor = color;
             },
             "The background color of the window."
+        )
+        .def_property_static(
+            "context",
+            [](py::object) -> WindowContext {
+                return Window::GetInstance().m_context;
+            },
+            [](py::object, WindowContext new_context) {
+                Window::GetInstance().m_context = new_context;
+            }
         )
         .def_static("set_title", [](const std::string& title) {
             Window::GetInstance().SetTitle(title);
@@ -333,6 +347,7 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 [](Text& self, const Color& new_color) { self.color = new_color; },
                 "The color of the text.");
 
-        py::class_<Sprite, RenderComponent, std::shared_ptr<Sprite>>(m, "Sprite")
-            .def(py::init<>());
+        py::class_<Sprite, Component, std::shared_ptr<Sprite>>(m, "Sprite")
+            .def(py::init<>())
+            .def_property("texture", &Sprite::GetTexture, &Sprite::SetTexture);
 }

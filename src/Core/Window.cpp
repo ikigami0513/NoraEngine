@@ -5,6 +5,7 @@
 #include "World/Entity.hpp"
 #include "World/Mesh/RenderComponent.hpp"
 #include "Gui/GuiComponent.hpp"
+#include "Graphics/Sprite.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -77,6 +78,7 @@ void Window::Setup() {
     AssetsManager::AddShader("mesh", std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl"));
     AssetsManager::AddShader("gui", std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl"));
     AssetsManager::AddShader("3d_model", std::make_unique<Shader>("../resources/shaders/3d_model/vert.glsl", "../resources/shaders/3d_model/frag.glsl"));
+    AssetsManager::AddShader("sprite", std::make_unique<Shader>("../resources/shaders/sprite/vert.glsl", "../resources/shaders/sprite/frag.glsl"));
 }
 
 void Window::ProcessInput() {
@@ -96,26 +98,36 @@ void Window::Render() {
     std::vector<Entity*> cameraEntities = m_scene.GetEntitiesWithComponent<Camera>();
     if (!cameraEntities.empty()) {
         Camera* camera = cameraEntities[0]->GetComponent<Camera>();
-        
-        // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)m_width / (float)m_height, 0.1f, 100.0f);
 
         // camera/view transformation
         glm::mat4 view = camera->GetViewMatrix();
 
-        // render meshes
-        std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<RenderComponent>();
-        for (auto entity : meshedEntities) {
-            RenderComponent* mesh = entity->GetComponent<RenderComponent>();
-            Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
-            mesh->Render(*shader, view, projection);
+        // render scene
+        if (m_context == WindowContext::Context3D) { // Render 3D
+            // pass projection matrix to shader (note that in this case it could change every frame)
+            glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)m_width / (float)m_height, 0.1f, 100.0f);
+            std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<RenderComponent>();
+            for (auto entity : meshedEntities) {
+                RenderComponent* mesh = entity->GetComponent<RenderComponent>();
+                Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
+                mesh->Render(*shader, view, projection);
+            }
+        }
+        else if (m_context == WindowContext::Context2D) { // Render 2D
+            glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
+            std::vector<Entity*> spritedEntities = m_scene.GetEntitiesWithComponent<Sprite>();
+            for (auto entity : spritedEntities) {
+                Sprite* sprite = entity->GetComponent<Sprite>();
+                Shader* shader = AssetsManager::GetShader(sprite->ShaderType());
+                sprite->Render(*shader, view, ortho_projection);
+            }
         }
 
         // render gui
-        glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
+        glm::mat4 gui_ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
         Shader* guiShader = AssetsManager::GetShader("gui");
         guiShader->Use();
-        guiShader->SetMat4("projection", ortho_projection);
+        guiShader->SetMat4("projection", gui_ortho_projection);
 
         std::vector<Entity*> guiEntities = m_scene.GetEntitiesWithComponent<GuiComponent>();
         for (auto entity : guiEntities) {

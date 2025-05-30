@@ -88,11 +88,7 @@ def init_camera_and_controller():
     Window.scene.add_entity(e)
 
 
-def initialize() -> None:
-    Window.set_title("Cuboid 3d space - Nora Engine Example")
-    Window.set_size(800, 600)
-    Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
-
+def create_3d_world():
     init_camera_and_controller()
     init_fps_display()
 
@@ -108,3 +104,36 @@ def initialize() -> None:
     model.set_owner(rock)
     rock.add_component(model)
     Window.scene.add_entity(rock)
+
+
+def create_2d_world():
+    init_fps_display()
+    init_camera()
+
+    e = Entity()
+    e.transform.local_position = Vec3(400.0, 300.0, 0.0)
+    sprite = Sprite()
+    sprite.texture = Texture("../resources/textures/awesomeface.png")
+    sprite.set_owner(e)
+    e.add_component(sprite)
+    Window.scene.add_entity(e)
+
+
+def init_camera():
+    e = Entity()
+    camera = Camera()
+    camera.set_owner(e)
+    e.add_component(camera)
+    Window.scene.add_entity(e)
+
+
+def initialize() -> None:
+    Window.set_title("Nora Engine Example")
+    Window.set_size(800, 600)
+    Window.context = WindowContext.Context2D
+    Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
+
+    if Window.context == WindowContext.Context3D:
+        create_3d_world()
+    else:
+        create_2d_world()

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 from typing import TypeVar, List, Tuple
 from abc import ABC
 
@@ -98,6 +98,11 @@ class Time:
     The number of frames per second calculated over the last second.
     Useful for performance monitoring and profiling.
     """
+
+
+class WindowContext(Enum):
+    Context2D = auto()
+    Context3D = auto()
     
 
 class Window:
@@ -107,6 +112,7 @@ class Window:
 
     background_color: Color
     scene: Scene
+    context: WindowContext
 
     @staticmethod
     def set_title(title: str) -> None:
@@ -360,5 +366,7 @@ class Text(GuiComponent):
     def __init__(self): ...
 
 
-class Sprite(RenderComponent):
+class Sprite(Component):
+    texture: Texture
+
     def __init__(self): ...

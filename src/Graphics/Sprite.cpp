@@ -70,5 +70,5 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
 }
 
 std::string Sprite::ShaderType() {
-    return "mesh";
+    return "sprite";
 }
