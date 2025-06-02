@@ -1,19 +1,16 @@
 #version 330 core
 
-// Entrée depuis le vertex shader (interpolée)
-in vec2 TexCoord;
-
-// Sortie (couleur finale du fragment)
+in vec2 TexCoords;
 out vec4 FragColor;
 
-// Uniforme pour la texture du sprite
-uniform sampler2D textureSampler; // Votre C++ fait m_texture->Bind(0), ce sampler utilisera l'unité de texture 0 par défaut.
+uniform sampler2D image;
+uniform vec4 spriteColor; // couleur pour teinter le sprite
 
 void main() {
-    // Échantillonnage de la texture aux coordonnées données
-    FragColor = texture(textureSampler, TexCoord);
-    
-    // Optionnel: si vous voulez ignorer les pixels totalement transparents (meilleur pour certains types de blending)
-    // if(FragColor.a < 0.1)
-    //     discard;
+    vec4 texColor = texture(image, TexCoords);
+    FragColor = texColor * spriteColor;
+
+    // Optionnel : discard transparent fragments (utile pour certains spritesheets)
+    if (FragColor.a < 0.1)
+        discard;
 }

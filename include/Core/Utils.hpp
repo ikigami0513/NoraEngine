@@ -1,15 +1,18 @@
-#ifdef NDEBUG
-	#define GL_CHECK_ERROR(label)
-#else
-	#define GL_CHECK_ERROR(label) CheckGLError(label)
+#ifndef UTILS_HPP
+#define UTILS_HPP
+
+#include <string>
+
+// Déclaration de la fonction
+void CheckGLError(const std::string& label);
+
+// Macro conditionnelle
+#ifndef GL_CHECK_ERROR
+    #ifdef NDEBUG
+        #define GL_CHECK_ERROR(label)
+    #else
+        #define GL_CHECK_ERROR(label) CheckGLError(label)
+    #endif
 #endif
 
-#include <iostream>
-#include <glad/glad.h>
-
-void CheckGLError(const std::string& label) {
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cerr << "OpenGL Error at [" << label << "]: " << err << std::endl;
-    }
-}
+#endif // UTILS_HPP

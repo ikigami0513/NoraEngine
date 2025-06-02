@@ -111,7 +111,7 @@ def create_2d_world():
     init_camera()
 
     e = Entity()
-    e.transform.local_position = Vec3(400.0, 300.0, 0.0)
+    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
     sprite = Sprite()
     sprite.texture = Texture("../resources/textures/awesomeface.png")
     sprite.set_owner(e)
@@ -121,6 +121,7 @@ def create_2d_world():
 
 def init_camera():
     e = Entity()
+    e.transform.local_position = Vec3(0.0, 0.0, 3.0)
     camera = Camera()
     camera.set_owner(e)
     e.add_component(camera)

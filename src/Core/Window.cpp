@@ -114,12 +114,13 @@ void Window::Render() {
             }
         }
         else if (m_context == WindowContext::Context2D) { // Render 2D
-            glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
+            glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height), 1.0f, 1.0f);
+            glm::mat4 view_2d = glm::mat4(1.0f);
             std::vector<Entity*> spritedEntities = m_scene.GetEntitiesWithComponent<Sprite>();
             for (auto entity : spritedEntities) {
                 Sprite* sprite = entity->GetComponent<Sprite>();
                 Shader* shader = AssetsManager::GetShader(sprite->ShaderType());
-                sprite->Render(*shader, view, ortho_projection);
+                sprite->Render(*shader, view_2d, ortho_projection);
             }
         }
 
