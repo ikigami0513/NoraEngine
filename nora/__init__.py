@@ -7,6 +7,7 @@ from nora.graphics.color import Color
 from nora.graphics.texture import Texture
 
 from nora.graphics.rendering.rendering_2d.camera_2d import Camera2D
+from nora.graphics.rendering.rendering_2d.animation_2d import Animation2D
 from nora.graphics.rendering.rendering_2d.sprite import Sprite
 
 from nora.graphics.rendering.rendering_3d.camera_3d import Camera3D

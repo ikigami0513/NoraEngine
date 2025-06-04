@@ -7,6 +7,7 @@
 #include "Core/Debug.hpp"
 #include "Graphics/Color.hpp"
 #include "Graphics/Sprite.hpp"
+#include "Graphics/Animation2D.hpp"
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
 #include "World/Camera3D.hpp"
@@ -354,4 +355,14 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         py::class_<Sprite, Component, std::shared_ptr<Sprite>>(m, "Sprite")
             .def(py::init<>())
             .def_property("texture", &Sprite::GetTexture, &Sprite::SetTexture);
+
+        py::class_<Animation2D, Component, std::shared_ptr<Animation2D>>(m, "Animation2D")
+            .def(
+                py::init<int, int, int, int, int>(),
+                py::arg("width"),
+                py::arg("height"),
+                py::arg("current_row"),
+                py::arg("frames_count"),
+                py::arg("animation_speed")
+            );
 }

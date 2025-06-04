@@ -101,11 +101,42 @@ class Transform {
             return m_isDirty;
         }
 
-        glm::mat4 GetLocalModelMatrix2D(std::shared_ptr<Texture> texture) const {
+        glm::mat4 GetLocalModelMatrix2D(std::shared_ptr<Texture> texture, const glm::vec4& textureRectNormalized) const {
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), m_pos);
+            
+            // Rotation for 2D is typically just around the Z-axis
             glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(m_eulerRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(texture->Width() * m_scale.x, texture->Height() * m_scale.y, 1.0f));
+
+            float displayWidth = 1.0f;  // Default width if texture is null or has no dimensions
+            float displayHeight = 1.0f; // Default height
+
+            if (texture && texture->Width() > 0 && texture->Height() > 0) {
+                float u_min = textureRectNormalized.x;
+                float v_min = textureRectNormalized.y;
+                float u_max = textureRectNormalized.z;
+                float v_max = textureRectNormalized.w;
+
+                float rect_u_width_normalized = u_max - u_min;
+                float rect_v_height_normalized = v_max - v_min;
+
+                // Calculate the display size based on the sub-rectangle's dimensions
+                displayWidth = rect_u_width_normalized * texture->Width();
+                displayHeight = rect_v_height_normalized * texture->Height();
+            } else if (texture) {
+                // Fallback or warning if texture dimensions are invalid
+                // std::cerr << "Warning: Texture has zero dimensions." << std::endl;
+                // Keep displayWidth/Height as 1.0f or use full m_scale if desired.
+                // For now, we'll use 1.0 which means the m_scale will be the direct pixel size.
+            }
+
+
+            // Apply the entity's local scale to the calculated display size
+            // The sprite quad is 1x1 unit, so scaling by displayWidth/Height makes it pixel-correct (before m_scale)
+            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), 
+                                            glm::vec3(displayWidth * m_scale.x, 
+                                                        displayHeight * m_scale.y, 
+                                                        1.0f)); // Z-scale is 1 for 2D
 
             model = translateMatrix * rotateMatrix * scaleMatrix;
             return model;
