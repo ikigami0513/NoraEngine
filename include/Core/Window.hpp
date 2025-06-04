@@ -48,6 +48,8 @@ class Window {
         Color BackgroundColor;
         WindowContext m_context;
 
+        GLFWwindow* GLFWWindow() const;
+
     private:
         Window();
         Window(const Window&) = delete;

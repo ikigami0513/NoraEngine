@@ -7,6 +7,7 @@
 #include "World/Mesh/RenderComponent.hpp"
 #include "Gui/GuiComponent.hpp"
 #include "Graphics/Sprite.hpp"
+#include "Core/Mouse.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -59,7 +60,7 @@ void Window::CreateWindow() {
     glfwSetCursorPosCallback(m_window, CursorPosCallback);
     glfwSetScrollCallback(m_window, ScrollCallback);
 
-    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    Mouse::SetMode(MouseMode::NORMAL);
 }
 
 void Window::InitGLAD() {
@@ -215,4 +216,8 @@ void Window::SetScene(const Scene& scene) {
 
 FT_Library Window::FT() {
     return m_ft;
+}
+
+GLFWwindow* Window::GLFWWindow() const {
+    return m_window;
 }

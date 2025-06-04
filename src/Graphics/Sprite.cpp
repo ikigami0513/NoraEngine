@@ -90,7 +90,6 @@ void Sprite::SetupMesh() {
 
 void Sprite::Start() {
     SetupMesh(); // Now uses m_vertices which might have been set by SetTextureRect before Start
-    // SetTextureRect(0.0f, 0.0f, 96.0f, 80.0f);
     GL_CHECK_ERROR("SetupMesh");
 }
 

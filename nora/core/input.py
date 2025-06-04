@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 from typing import Tuple
 
 
@@ -118,3 +118,14 @@ class Input:
 
     @staticmethod
     def is_mouse_button_just_released(mouse_code: MouseCode) -> bool: ...
+
+
+class MouseMode(Enum):
+    Normal = auto()
+    Hidden = auto()
+    Disabled = auto()
+
+
+class Mouse:
+    mode: MouseMode
+    

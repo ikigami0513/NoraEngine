@@ -1,6 +1,26 @@
 from typing import List
 
 
+class Vec2:
+    """ Represents a 2D vector. """
+    x: float
+    y: float
+
+    def __init__(self, x: float = 0.0, y: float = 0.0) -> None: ...
+
+    def __repr__(self) -> str: ...
+
+    def normalize(self) -> None:
+        """
+            Normalize the vector in place
+        """
+
+    def normalized(self) -> 'Vec2':
+        """
+            Return a normalized copy of the vector
+        """
+
+
 class Vec3:
     """
     Represents a 3D vector.

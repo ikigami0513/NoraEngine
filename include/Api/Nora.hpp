@@ -3,6 +3,7 @@
 #include <pybind11/operators.h>
 #include "Core/Time.hpp"
 #include "Core/Input.hpp"
+#include "Core/Mouse.hpp"
 #include "Core/Key.hpp"
 #include "Core/Debug.hpp"
 #include "Graphics/Color.hpp"
@@ -46,6 +47,34 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def(float() * py::self)
         .def("__repr__", [](const glm::vec3& v) {
             return "<Vec3 x=" + std::to_string(v.x) + " y=" + std::to_string(v.y) + " z=" + std::to_string(v.z) + ">";
+        });
+
+    py::class_<glm::vec2>(m, "Vec2")
+        .def(py::init<float, float>(), py::arg("x") = 0.0f, py::arg("y") = 0.0f)
+        .def_readwrite("x", &glm::vec2::x)
+        .def_readwrite("y", &glm::vec2::y)
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * py::self)
+        .def(py::self / py::self)
+        .def(py::self * float())
+        .def(py::self / float())
+        .def(float() * py::self)
+        .def("normalize", [](glm::vec2 &v) {
+            float len = glm::length(v);
+            if (len > 0.0f) {
+                v /= len;
+            }
+        }, "Normalize the vector in place")
+        .def("normalized", [](const glm::vec2 &v) -> glm::vec2 {
+            float len = glm::length(v);
+            if (len > 0.0f) {
+                return v / len;
+            }
+            return glm::vec2(0.0f, 0.0f);
+        }, "Return a normalized copy of the vector")
+        .def("__repr__", [](const glm::vec3& v) {
+            return "<Vec2 x=" + std::to_string(v.x) + " y=" + std::to_string(v.y) + ">";
         });
 
     py::class_<glm::mat4>(m, "Mat4")
@@ -204,6 +233,18 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .value("Down", Key::Down)
         .value("Up", Key::Up)
         .export_values();
+
+    py::enum_<MouseMode>(m, "MouseMode")
+        .value("Normal", MouseMode::NORMAL)
+        .value("Hidden", MouseMode::HIDDEN)
+        .value("Disabled", MouseMode::DISABLED)
+        .export_values();
+
+    py::class_<Mouse>(m, "Mouse")
+        .def_property_static("mode",
+            [](py::object /* cls */) { return Mouse::GetMode(); },      // Getter
+            [](py::object /* cls */, MouseMode mode) { Mouse::SetMode(mode); } // Setter
+        );
 
     py::enum_<MouseCode>(m, "MouseCode")
         .value("Button1", MouseCode::Button1)

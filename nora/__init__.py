@@ -1,5 +1,5 @@
 from nora.core.debug import Debug
-from nora.core.input import Key, MouseCode, Input
+from nora.core.input import Key, MouseCode, Input, Mouse, MouseMode
 from nora.core.time import Time
 from nora.core.window import WindowContext, Window
 
@@ -15,7 +15,7 @@ from nora.graphics.rendering.rendering_3d.mesh import RenderComponent, CuboidMes
 
 from nora.gui.gui import GuiComponent, Font, Text
 
-from nora.physics.math import Vec3, Mat4
+from nora.physics.math import Vec2, Vec3, Mat4
 from nora.physics.transform import Transform
 
 
