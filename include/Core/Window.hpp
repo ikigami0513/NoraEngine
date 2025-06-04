@@ -14,6 +14,7 @@
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
 #include "Core/Input.hpp"
+#include "Core/Renderer.hpp"
 #include "World/Scene.hpp"
 
 namespace py = pybind11;
@@ -63,6 +64,7 @@ class Window {
 
         FT_Library m_ft;
         Scene m_scene;
+        Renderer m_renderer;
 
         void OnResize(int width, int height);
         static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);

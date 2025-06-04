@@ -253,7 +253,7 @@ extern float g_fLightIntensity /*=0.0f*/;
 extern D3DCOLOR g_avLightColors[3];
 
 extern RenderOptions g_sOptions;
-extern Camera g_sCamera;
+extern Camera3D g_sCamera;
 extern AssetHelper *g_pcAsset /*= NULL*/;
 
 //

@@ -14,10 +14,14 @@ class Texture {
         void Unbind(unsigned int unit = 0) const;
         std::string Path();
         std::string Type();
+        int Width();
+        int Height();
 
     private:
         std::string m_path;
         std::string m_type;
+        int m_width;
+        int m_height;
 };
 
 #endif

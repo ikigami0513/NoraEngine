@@ -1,15 +1,8 @@
+import json
+from game.fps_display_component import FPSDisplayComponent
 from nora import *
 from nora_contrib.player_controller import PlayerController
-
-
-class FPSDisplayComponent(Component):
-    def start(self):
-        self.last_fps = 0.0
-
-    def update(self):
-        if self.last_fps != Time.fps:
-            self.owner.get_component(Text).text = f"{Time.fps} FPS"
-            self.last_fps = Time.fps
+from typing import Dict, Any
 
 
 def init_cuboid(t: Texture):
@@ -81,7 +74,7 @@ def init_camera_and_controller():
     player_controller.set_owner(e)
     e.add_component(player_controller)
 
-    camera = Camera()
+    camera = Camera3D()
     camera.set_owner(e)
     e.add_component(camera)
 
@@ -111,7 +104,8 @@ def create_2d_world():
     init_camera()
 
     e = Entity()
-    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
+    size = Window.get_size()
+    e.transform.local_position = Vec3(size[0] / 2, size[1] / 2, 0.0)
     sprite = Sprite()
     sprite.texture = Texture("../resources/textures/awesomeface.png")
     sprite.set_owner(e)
@@ -121,17 +115,21 @@ def create_2d_world():
 
 def init_camera():
     e = Entity()
-    e.transform.local_position = Vec3(0.0, 0.0, 3.0)
-    camera = Camera()
+    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
+    camera = Camera2D()
     camera.set_owner(e)
     e.add_component(camera)
     Window.scene.add_entity(e)
 
 
 def initialize() -> None:
-    Window.set_title("Nora Engine Example")
-    Window.set_size(800, 600)
-    Window.context = WindowContext.Context2D
+    with open("../settings.json", "rb") as f:
+        settings: Dict[str, Any] = json.load(f)
+
+    Window.set_title(settings.get("title"))
+    size: Dict[str, int] = settings.get("size", {})
+    Window.set_size(size.get("width", 600), size.get("height", 800))
+    Window.context = getattr(WindowContext, f"Context{settings.get('context')}")
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
 
     if Window.context == WindowContext.Context3D:

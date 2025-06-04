@@ -1,4 +1,4 @@
-from nora import Component, Camera, Time, Input, Key
+from nora import Component, Camera3D, Time, Input, Key
 
 
 class PlayerController(Component):
@@ -13,7 +13,7 @@ class PlayerController(Component):
         self.max_pitch = 89.0
         self.min_zoom = 1.0
         self.max_zoom = 45.0
-        self.camera = self.owner.get_component(Camera)
+        self.camera = self.owner.get_component(Camera3D)
 
     def update(self):
         self.process_keyboard()

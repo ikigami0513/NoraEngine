@@ -46,12 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** \brief Camera class
 */
 //-------------------------------------------------------------------------------
-class Camera
+class Camera3D
     {
     public:
 
 
-        Camera ()
+        Camera3D ()
             :
 
             vPos(0.0f,0.0f,-10.0f),

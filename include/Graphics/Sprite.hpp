@@ -20,8 +20,8 @@ class Sprite : public Component {
             m_texture = std::move(texture);
         }
 
-        Texture GetTexture() {
-            return *m_texture;
+        std::shared_ptr<Texture> GetTexture() {
+            return m_texture;
         }
 
     private:

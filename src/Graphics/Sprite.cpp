@@ -1,6 +1,7 @@
 #include "Graphics/Sprite.hpp"
 #include "World/Entity.hpp"
 #include "Core/Utils.hpp"
+#include "Core/Debug.hpp"
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -59,6 +60,11 @@ void Sprite::Start() {
 }
 
 void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+    if (m_texture == nullptr) {
+        Debug::Error("No Texture linked");
+        return;
+    }
+
     // Save OpenGL state
     GLboolean wasDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
     GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
@@ -83,9 +89,10 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
         std::cout << "No texture" << std::endl;
     }
 
-    shader.SetMat4("model", m_owner->GetTransform().GetModelMatrix());
+    shader.SetMat4("model", m_owner->GetTransform().GetLocalModelMatrix2D(m_texture));
     shader.SetMat4("view", viewMatrix);
     shader.SetMat4("projection", projectionMatrix);
+    
     shader.SetVec4("spriteColor", glm::vec4(1.0f));
     GL_CHECK_ERROR("Uniform updates");
 

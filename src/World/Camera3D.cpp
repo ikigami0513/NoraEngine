@@ -1,53 +1,53 @@
-#include "World/Camera.hpp"
+#include "World/Camera3D.hpp"
 #include "World/Entity.hpp"
 
-Camera::Camera(const glm::vec3 &worldUp, float yaw, float pitch)
+Camera3D::Camera3D(const glm::vec3 &worldUp, float yaw, float pitch)
 : WorldUp(worldUp), Yaw(yaw), Pitch(pitch), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
     UpdateCameraVectors();
 }
 
-glm::mat4 Camera::GetViewMatrix() const {
+glm::mat4 Camera3D::GetViewMatrix() const {
     const glm::vec3 position = m_owner->GetTransform().GetGlobalPosition();
     return glm::lookAt(position, position + Front, Up);
 }
 
-void Camera::Update() {
+void Camera3D::Update() {
     UpdateCameraVectors();
 }
 
-float Camera::GetYaw() const {
+float Camera3D::GetYaw() const {
     return Yaw;
 }
 
-float Camera::GetPitch() const {
+float Camera3D::GetPitch() const {
     return Pitch;
 }
 
-float Camera::GetZoom() const {
+float Camera3D::GetZoom() const {
     return Zoom;
 }
 
-void Camera::SetYaw(float yaw) {
+void Camera3D::SetYaw(float yaw) {
     Yaw = yaw;
 }
 
-void Camera::SetPitch(float pitch) {
+void Camera3D::SetPitch(float pitch) {
     Pitch = pitch;
 }
 
-void Camera::SetZoom(float zoom) {
+void Camera3D::SetZoom(float zoom) {
     Zoom = zoom;
 }
 
-glm::vec3 Camera::GetFront() const {
+glm::vec3 Camera3D::GetFront() const {
     return Front;
 }
 
-glm::vec3 Camera::GetRight() const {
+glm::vec3 Camera3D::GetRight() const {
     return Right;
 }
 
-void Camera::UpdateCameraVectors() {
+void Camera3D::UpdateCameraVectors() {
     // Calculate the new Front vector
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));

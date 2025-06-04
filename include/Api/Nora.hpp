@@ -9,7 +9,8 @@
 #include "Graphics/Sprite.hpp"
 #include "World/Entity.hpp"
 #include "World/Component.hpp"
-#include "World/Camera.hpp"
+#include "World/Camera3D.hpp"
+#include "World/Camera2D.hpp"
 #include "World/Transform.hpp"
 #include "World/Mesh/CuboidMesh.hpp"
 #include "World/Mesh/SphereMesh.hpp"
@@ -255,17 +256,20 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
             return self.GetOwner();
         });
 
-    py::class_<Camera, Component, std::shared_ptr<Camera>>(m, "Camera")
+    py::class_<Camera3D, Component, std::shared_ptr<Camera3D>>(m, "Camera3D")
         .def(py::init<>())
-        .def_property_readonly("front", [](const Camera& cam) {
+        .def_property_readonly("front", [](const Camera3D& cam) {
             return cam.GetFront();
         }, "Direction vector the camera is facing.")
-        .def_property_readonly("right", [](const Camera& cam) {
+        .def_property_readonly("right", [](const Camera3D& cam) {
             return cam.GetRight();
         }, "Direction vector right of the camera.")
-        .def_property("zoom", &Camera::GetZoom, &Camera::SetZoom, "Camera field of view in degrees.")
-        .def_property("yaw", &Camera::GetYaw, &Camera::SetYaw, "Camera field of view in degrees.")
-        .def_property("pitch", &Camera::GetPitch, &Camera::SetPitch, "Camera field of view in degrees.");
+        .def_property("zoom", &Camera3D::GetZoom, &Camera3D::SetZoom, "Camera field of view in degrees.")
+        .def_property("yaw", &Camera3D::GetYaw, &Camera3D::SetYaw, "Camera field of view in degrees.")
+        .def_property("pitch", &Camera3D::GetPitch, &Camera3D::SetPitch, "Camera field of view in degrees.");
+
+    py::class_<Camera2D, Component, std::shared_ptr<Camera2D>>(m, "Camera2D")
+        .def(py::init<>());
 
     py::class_<Scene>(m, "Scene")
         .def(py::init<>())

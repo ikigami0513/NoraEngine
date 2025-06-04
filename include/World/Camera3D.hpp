@@ -1,5 +1,5 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef CAMERA3D_HPP
+#define CAMERA3D_HPP
 
 #include "World/Component.hpp"
 #include "Core/Time.hpp"
@@ -13,7 +13,7 @@ enum CameraMovement {
     RIGHT
 };
 
-class Camera : public Component {
+class Camera3D : public Component {
     private:
         // Camera attributes
         glm::vec3 Front { 0.0f, 0.0f, -1.0f };
@@ -38,7 +38,7 @@ class Camera : public Component {
         void UpdateCameraVectors();
 
     public:
-        Camera(
+        Camera3D(
             const glm::vec3& worldUp = glm::vec3(0.0f, 1.0f, 0.0f),
             float yaw = -90.0f,
             float pitch = 0.0f

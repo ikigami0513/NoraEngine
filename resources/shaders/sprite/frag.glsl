@@ -9,8 +9,4 @@ uniform vec4 spriteColor; // couleur pour teinter le sprite
 void main() {
     vec4 texColor = texture(image, TexCoords);
     FragColor = texColor * spriteColor;
-
-    // Optionnel : discard transparent fragments (utile pour certains spritesheets)
-    if (FragColor.a < 0.1)
-        discard;
 }

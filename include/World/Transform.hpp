@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Graphics/Texture.hpp"
 
 class Transform {
     protected:
@@ -98,6 +99,16 @@ class Transform {
 
         bool IsDirty() const {
             return m_isDirty;
+        }
+
+        glm::mat4 GetLocalModelMatrix2D(std::shared_ptr<Texture> texture) const {
+            glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), m_pos);
+            glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(m_eulerRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(texture->Width() * m_scale.x, texture->Height() * m_scale.y, 1.0f));
+
+            model = translateMatrix * rotateMatrix * scaleMatrix;
+            return model;
         }
 };
 

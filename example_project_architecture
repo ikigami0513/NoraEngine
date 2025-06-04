@@ -1,0 +1,6 @@
+NoraEngine/   -> Contient les exécutables du moteur de jeu
+nora/         -> Contient les fichiers interface python pour le module nora
+nora_contrib/ -> Contient du code préfait pour faciliter l'utilisation du moteur
+resources/    -> Contient les fichiers assets du projets (shaders, modèles 3D, textures, audio, scènes, etc...)
+game/         -> Contient les codes sources python du jeu
+settings.json -> Contient les paramètres du jeu (Context, titre, dimension de la fenêtre, etc...)

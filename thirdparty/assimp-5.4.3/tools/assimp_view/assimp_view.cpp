@@ -129,7 +129,7 @@ float g_fLightIntensity = 1.0f;
 float g_fLightColor = 1.0f;
 
 RenderOptions g_sOptions;
-Camera g_sCamera;
+Camera3D g_sCamera;
 AssetHelper *g_pcAsset = nullptr;
 
 //

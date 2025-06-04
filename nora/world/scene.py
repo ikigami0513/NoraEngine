@@ -1,0 +1,9 @@
+from nora.world.ecs import Entity
+from typing import List
+
+
+class Scene:
+    def __init__(self): ...
+
+    def add_entity(entity: Entity) -> None: ...
+    def get_root_entities() -> List[Entity]: ...

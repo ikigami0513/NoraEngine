@@ -1,7 +1,8 @@
 #include "Core/Window.hpp"
 #include "Core/Time.hpp"
 #include "Core/AssetsManager.hpp"
-#include "World/Camera.hpp"
+#include "World/Camera3D.hpp"
+#include "World/Camera2D.hpp"
 #include "World/Entity.hpp"
 #include "World/Mesh/RenderComponent.hpp"
 #include "Gui/GuiComponent.hpp"
@@ -95,51 +96,21 @@ void Window::Render() {
     glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.alpha);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::vector<Entity*> cameraEntities = m_scene.GetEntitiesWithComponent<Camera>();
-    if (!cameraEntities.empty()) {
-        Camera* camera = cameraEntities[0]->GetComponent<Camera>();
+    bool hasCamera = false;
+    if (m_context == WindowContext::Context3D) {
+        hasCamera = m_renderer.Rendering3D(m_scene, m_width, m_height);
+    }
+    else if (m_context == WindowContext::Context2D) {
+        hasCamera = m_renderer.Rendering2D(m_scene, m_width, m_height);
+    }
 
-        // camera/view transformation
-        glm::mat4 view = camera->GetViewMatrix();
-
-        // render scene
-        if (m_context == WindowContext::Context3D) { // Render 3D
-            // pass projection matrix to shader (note that in this case it could change every frame)
-            glm::mat4 projection = glm::perspective(glm::radians(camera->GetZoom()), (float)m_width / (float)m_height, 0.1f, 100.0f);
-            std::vector<Entity*> meshedEntities = m_scene.GetEntitiesWithComponent<RenderComponent>();
-            for (auto entity : meshedEntities) {
-                RenderComponent* mesh = entity->GetComponent<RenderComponent>();
-                Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
-                mesh->Render(*shader, view, projection);
-            }
-        }
-        else if (m_context == WindowContext::Context2D) { // Render 2D
-            glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height), 1.0f, 1.0f);
-            glm::mat4 view_2d = glm::mat4(1.0f);
-            std::vector<Entity*> spritedEntities = m_scene.GetEntitiesWithComponent<Sprite>();
-            for (auto entity : spritedEntities) {
-                Sprite* sprite = entity->GetComponent<Sprite>();
-                Shader* shader = AssetsManager::GetShader(sprite->ShaderType());
-                sprite->Render(*shader, view_2d, ortho_projection);
-            }
-        }
-
-        // render gui
-        glm::mat4 gui_ortho_projection = glm::ortho(0.0f, static_cast<float>(m_width), 0.0f, static_cast<float>(m_height));
-        Shader* guiShader = AssetsManager::GetShader("gui");
-        guiShader->Use();
-        guiShader->SetMat4("projection", gui_ortho_projection);
-
-        std::vector<Entity*> guiEntities = m_scene.GetEntitiesWithComponent<GuiComponent>();
-        for (auto entity : guiEntities) {
-            GuiComponent* gui = entity->GetComponent<GuiComponent>();
-            Shader* shader = AssetsManager::GetShader(gui->ShaderType());
-            gui->Render(*shader);
-        }
+    if (hasCamera) {
+        m_renderer.RenderingGUI(m_scene, m_width, m_height);
     }
 }
 
 void Window::Shutdown() {
+    delete &m_scene;
     m_game = std::make_unique<py::object>(); // Reset to null object
 }
 
