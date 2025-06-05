@@ -18,3 +18,4 @@ def init_fps_display():
     fps_entity.add_component(fps_text)
 
     Window.scene.add_entity(fps_entity)
+    

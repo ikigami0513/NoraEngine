@@ -311,7 +311,8 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_property("pitch", &Camera3D::GetPitch, &Camera3D::SetPitch, "Camera field of view in degrees.");
 
     py::class_<Camera2D, Component, std::shared_ptr<Camera2D>>(m, "Camera2D")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def_property("target", &Camera2D::GetTarget, &Camera2D::SetTarget);
 
     py::class_<Scene>(m, "Scene")
         .def(py::init<>())

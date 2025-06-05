@@ -7,11 +7,17 @@ from game.player_component import PlayerComponent
 
 def create_2d_world():
     init_fps_display()
-    init_camera()
+
+    e = Entity()
+    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
+    camera = Camera2D()
+    camera.set_owner(e)
+    e.add_component(camera)
+    Window.scene.add_entity(e)
 
     e = Entity()
     size = Window.get_size()
-    e.transform.local_position = Vec3(size[0] / 2, size[1] / 2, 0.0)
+    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
     e.transform.local_scale = Vec3(2.5, 2.5, 0.0)
     sprite = Sprite()
     sprite.texture = Texture("../resources/textures/player/idle/idle_down.png")
@@ -36,15 +42,17 @@ def create_2d_world():
     player.set_owner(e)
     e.add_component(player)
 
-    Window.scene.add_entity(e)
+    tree = Entity()
+    tree.transform.local_position = Vec3(100.0, 95.0, 0.0)
+    tree.transform.local_scale = Vec3(3.0, 3.0, 0.0)
+    tree_sprite = Sprite()
+    tree_sprite.texture = Texture("../resources/textures/trees/tree1/tree1_green.png")
+    tree_sprite.set_owner(tree)
+    tree.add_component(tree_sprite)
+    Window.scene.add_entity(tree)
 
+    camera.target = e
 
-def init_camera():
-    e = Entity()
-    e.transform.local_position = Vec3(0.0, 0.0, 0.0)
-    camera = Camera2D()
-    camera.set_owner(e)
-    e.add_component(camera)
     Window.scene.add_entity(e)
 
 

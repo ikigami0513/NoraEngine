@@ -9,13 +9,17 @@
 class Camera2D : public Component {
     private:
         float m_zoom = 1.0f;
+        Entity* m_target;
         
     public:
         void SetZoom(float zoom);
         float GetZoom() const;
 
+        void SetTarget(Entity* target);
+        Entity* GetTarget();
         glm::mat4 GetViewMatrix() const;
         glm::mat4 GetProjectionMatrix() const;
+        void Update() override;
 };
 
 #endif
