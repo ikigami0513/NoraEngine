@@ -18,6 +18,8 @@ from nora.gui.gui import GuiComponent, Font, Text, Rectangle, Alignment, Button
 from nora.physics.math import Vec2, Vec3, Mat4
 from nora.physics.transform import Transform
 from nora.physics.rect_collider import RectCollider
+from nora.physics.rigidbody_2d import Rigidbody2D
+from nora.physics.offset import Offset
 
 from nora.world.ecs import Component, Entity
 from nora.world.scene import Scene

@@ -1,7 +1,7 @@
 #ifndef PYTHON_COMPONENT_WRAPPER_HPP
 #define PYTHON_COMPONENT_WRAPPER_HPP
 
-#include "World/Component.hpp"
+#include "ECS/Component.hpp"
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;

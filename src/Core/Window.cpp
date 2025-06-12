@@ -3,11 +3,11 @@
 #include "Core/AssetsManager.hpp"
 #include "World/Camera3D.hpp"
 #include "World/Camera2D.hpp"
-#include "World/Entity.hpp"
-#include "World/Mesh/RenderComponent.hpp"
+#include "ECS/Entity.hpp"
+#include "Graphics/3D/Mesh/RenderComponent.hpp"
 #include "Gui/GuiComponent.hpp"
-#include "Graphics/Sprite.hpp"
-#include "Core/Mouse.hpp"
+#include "Graphics/2D/Sprite.hpp"
+#include "Core/Input/Mouse.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

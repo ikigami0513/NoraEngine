@@ -1,5 +1,5 @@
 #include "Gui/Button.hpp"
-#include "Core/Input.hpp"
+#include "Core/Input/Input.hpp"
 #include "Core/Window.hpp"
 
 Button::Button() {}

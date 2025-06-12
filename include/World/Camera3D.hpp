@@ -1,7 +1,7 @@
 #ifndef CAMERA3D_HPP
 #define CAMERA3D_HPP
 
-#include "World/Component.hpp"
+#include "ECS/Component.hpp"
 #include "Core/Time.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

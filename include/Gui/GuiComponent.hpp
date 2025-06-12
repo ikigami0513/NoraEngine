@@ -1,7 +1,7 @@
 #ifndef GUI_COMPONENT_HPP
 #define GUI_COMPONENT_HPP
 
-#include "World/Component.hpp"
+#include "ECS/Component.hpp"
 #include "Graphics/Shader.hpp"
 #include <glad/glad.h>
 #include <memory>

@@ -1,6 +1,6 @@
 #include "Api/PythonComponentWrapper.hpp"
 #include <iostream>
-#include "World/Entity.hpp"
+#include "ECS/Entity.hpp"
 
 PythonComponentWrapper::PythonComponentWrapper(py::object py_component) : py_component_(py_component) {}
 

@@ -1,5 +1,5 @@
 #include "World/Camera3D.hpp"
-#include "World/Entity.hpp"
+#include "ECS/Entity.hpp"
 
 Camera3D::Camera3D(const glm::vec3 &worldUp, float yaw, float pitch)
 : WorldUp(worldUp), Yaw(yaw), Pitch(pitch), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {

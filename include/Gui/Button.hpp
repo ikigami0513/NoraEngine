@@ -1,10 +1,10 @@
 #ifndef BUTTON_HPP
 #define BUTTON_HPP
 
-#include "World/Component.hpp"
+#include "ECS/Component.hpp"
 #include "Gui/Text.hpp"
 #include "Gui/Rectangle.hpp"
-#include "World/Entity.hpp"
+#include "ECS/Entity.hpp"
 #include "Graphics/Color.hpp"
 #include <functional>
 

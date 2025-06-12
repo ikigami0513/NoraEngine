@@ -1,5 +1,5 @@
 #include "World/Camera2D.hpp"
-#include "World/Entity.hpp"
+#include "ECS/Entity.hpp"
 #include "Core/Window.hpp"
 
 void Camera2D::SetZoom(float zoom) {

@@ -1,6 +1,6 @@
 #include "Gui/Rectangle.hpp"
-#include "World/Entity.hpp"
-#include "Core/Debug.hpp"
+#include "ECS/Entity.hpp"
+#include "Utils/Debug.hpp"
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 

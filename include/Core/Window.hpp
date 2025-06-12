@@ -13,9 +13,9 @@
 #include "Graphics/Color.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
-#include "Core/Input.hpp"
-#include "Core/Renderer.hpp"
-#include "World/Scene.hpp"
+#include "Core/Input/Input.hpp"
+#include "Graphics/Renderer.hpp"
+#include "ECS/Scene.hpp"
 
 namespace py = pybind11;
 

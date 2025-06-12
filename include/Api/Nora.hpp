@@ -3,23 +3,25 @@
 #include <pybind11/operators.h>
 #include <pybind11/functional.h>
 #include "Core/Time.hpp"
-#include "Core/Input.hpp"
-#include "Core/Mouse.hpp"
-#include "Core/Key.hpp"
-#include "Core/Debug.hpp"
+#include "Core/Input/Input.hpp"
+#include "Core/Input/Mouse.hpp"
+#include "Core/Input/Key.hpp"
+#include "Utils/Debug.hpp"
 #include "Graphics/Color.hpp"
-#include "Graphics/Sprite.hpp"
-#include "Graphics/Animation2D.hpp"
-#include "World/Entity.hpp"
-#include "World/Component.hpp"
+#include "Graphics/2D/Sprite.hpp"
+#include "Graphics/2D/Animation2D.hpp"
+#include "ECS/Entity.hpp"
+#include "ECS/Component.hpp"
 #include "World/Camera3D.hpp"
 #include "World/Camera2D.hpp"
-#include "World/Transform.hpp"
-#include "World/Mesh/CuboidMesh.hpp"
-#include "World/Mesh/SphereMesh.hpp"
-#include "World/Mesh/CapsuleMesh.hpp"
-#include "World/Mesh/3DModel/Model.hpp"
-#include "Physics/RectCollider.hpp"
+#include "Physics/Transform.hpp"
+#include "Graphics/3D/Mesh/CuboidMesh.hpp"
+#include "Graphics/3D/Mesh/SphereMesh.hpp"
+#include "Graphics/3D/Mesh/CapsuleMesh.hpp"
+#include "Graphics/3D/Mesh/3DModel/Model.hpp"
+#include "Physics/2D/RectCollider.hpp"
+#include "Physics/2D/Rigidbody2D.hpp"
+#include "Physics/Offset.hpp"
 #include "Gui/Font.hpp"
 #include "Gui/GuiComponent.hpp"
 #include "Gui/Text.hpp"
@@ -432,7 +434,18 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 &Rectangle::SetHeight
             );
 
+        py::class_<Offset>(m, "Offset")
+            .def(py::init<float, float, float, float>(), py::arg("up") = 0.0f, py::arg("down") = 0.0f, py::arg("left") = 0.0f, py::arg("right") = 0.0f)
+            .def_property("up", [](const Offset& offset) { return offset.up; }, [](Offset& offset, float p_up) { offset.up = p_up; })
+            .def_property("down", [](const Offset& offset) { return offset.down; }, [](Offset& offset, float p_down) { offset.down = p_down; })
+            .def_property("left", [](const Offset& offset) { return offset.left; }, [](Offset& offset, float p_left) { offset.left = p_left; })
+            .def_property("right", [](const Offset& offset) { return offset.right; }, [](Offset& offset, float p_right) { offset.right = p_right; });
+
         py::class_<RectCollider, Component, std::shared_ptr<RectCollider>>(m, "RectCollider")
+            .def(py::init<>())
+            .def_property("offset", [](const RectCollider& collider) { return collider.offset; }, [](RectCollider& collider, const Offset& p_offset) { collider.offset = p_offset; });
+
+        py::class_<Rigidbody2D, Component, std::shared_ptr<Rigidbody2D>>(m, "Rigidbody2D")
             .def(py::init<>());
 
         py::class_<Button, Component, std::shared_ptr<Button>>(m, "Button")

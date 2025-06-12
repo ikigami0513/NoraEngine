@@ -8,24 +8,32 @@ from game.player_component import PlayerComponent
 
 player_entity = None
 camera_entity = None
+button_entity = None
 
 
 def button_on_click():
+    global player_entity, camera_entity, button_entity
+
     if player_entity:
         camera = camera_entity.get_component(Camera2D)
-        if camera:
+        if camera.target == player_entity:
+            camera.target = None
+            button_entity.get_component(Text).text = "Target the player"
+        else:
             camera.target = player_entity
+            button_entity.get_component(Text).text = "Untarget the player"
 
 
 def create_2d_world():
     init_fps_display()
     font = Font("../resources/fonts/Antonio-Regular.ttf", 16)
 
-    rect_entity = Entity()
-    rect_entity.transform.local_position = Vec3(Window.get_size()[0] - 200, Window.get_size()[1] - 30, 0.0)
+    global button_entity
+    button_entity = Entity()
+    button_entity.transform.local_position = Vec3(Window.get_size()[0] - 200, Window.get_size()[1] - 30, 0.0)
     rect = Rectangle(color=Color(0.0, 1.0, 1.0), width=300, height=50)
-    rect.set_owner(rect_entity)
-    rect_entity.add_component(rect)
+    rect.set_owner(button_entity)
+    button_entity.add_component(rect)
 
     text = Text()
     text.text = "Target the player"
@@ -33,17 +41,17 @@ def create_2d_world():
     text.margin = 10.0
     text.alignement = Alignment.Center
     text.color = Color(0.0, 0.0, 0.0)
-    text.set_owner(rect_entity)
-    rect_entity.add_component(text)
+    text.set_owner(button_entity)
+    button_entity.add_component(text)
 
     button = Button()
     button.hovered_color = Color(0.0, 0.85, 0.95)
     button.on_click_color = Color(0.0, 0.6, 0.7)
     button.on_click = button_on_click
-    button.set_owner(rect_entity)
-    rect_entity.add_component(button)
+    button.set_owner(button_entity)
+    button_entity.add_component(button)
 
-    Window.scene.add_entity(rect_entity)
+    Window.scene.add_entity(button_entity)
 
     global camera_entity
     camera_entity = Entity()
@@ -64,10 +72,15 @@ def create_2d_world():
     player_entity.add_component(sprite)
 
     rect_collider = RectCollider()
+    rect_collider.offset = Offset(100, 100, 100, 100)
     rect_collider.set_owner(player_entity)
     player_entity.add_component(rect_collider)
 
-    animation = Animation2D(96, 80, 1, 8, 5)
+    rigidbody = Rigidbody2D()
+    rigidbody.set_owner(player_entity)
+    player_entity.add_component(rigidbody)
+
+    animation = Animation2D(96, 80, 1, 8, 2)
     animation.set_owner(player_entity)
     player_entity.add_component(animation)
 

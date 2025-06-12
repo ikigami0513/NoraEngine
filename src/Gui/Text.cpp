@@ -1,6 +1,6 @@
 #include "Gui/Text.hpp"
-#include "World/Entity.hpp"
-#include "Core/Utils.hpp"
+#include "ECS/Entity.hpp"
+#include "Utils/Utils.hpp"
 
 Text::Text() {}
 

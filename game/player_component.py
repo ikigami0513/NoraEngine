@@ -118,4 +118,4 @@ class PlayerComponent(Component):
             self.text.text = f"X: {pos.x:.2f} Y: {pos.y:.2f} Health: {self.health.current()}"
 
     def on_collision_enter(self, other: Entity):
-        print(f"{self} collided with {other}")
+        pass
