@@ -10,6 +10,12 @@
 #include "Graphics/Color.hpp"
 #include "Gui/GuiComponent.hpp"
 
+enum class Alignment {
+    Left,
+    Center,
+    Right
+};
+
 class Text: public GuiComponent {
     public:
         Text();
@@ -17,10 +23,15 @@ class Text: public GuiComponent {
 
         void Start() override;
         void Render(Shader& shader) override;
+        std::string ShaderType() override;
+
+        glm::vec2 GetTextBounds(float scale = 1.0f);
 
         std::shared_ptr<Font> font;
         std::string text;
         Color color;
+        Alignment alignmenent = Alignment::Center;
+        float margin = 0.0f;
 
     private:
         void SetupMesh();

@@ -12,9 +12,7 @@ class GuiComponent : public Component {
 
         virtual void Start() override = 0;
         virtual void Render(Shader& shader) = 0;
-        std::string ShaderType() {
-            return "gui";
-        }
+        virtual std::string ShaderType() = 0;
 };
 
 #endif

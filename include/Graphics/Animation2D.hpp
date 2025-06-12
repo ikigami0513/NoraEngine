@@ -8,10 +8,22 @@
 
 class Animation2D : public Component {
     public:
-        Animation2D(int width, int height, int currentRow, int framesCount, int animationSpeed);
+        Animation2D(int width, int height, int currentRow, int framesCount, int animationSpeed, bool repeat = true);
 
         void Start() override;
         void Update() override;
+        
+        void SetRepeat(bool repeat);
+        bool GetRepeat();
+
+        void SetFinish(bool finish);
+        bool GetFinish();
+
+        void SetCurrentFrame(float currentFrame);
+        float GetCurrentFrame();
+
+        void SetFramesCount(int framesCount);
+        int GetFramesCount();
 
     private:
         Sprite* m_sprite;
@@ -21,6 +33,8 @@ class Animation2D : public Component {
         int m_currentRow;
         int m_framesCount;
         float m_animationSpeed;
+        bool m_repeat;
+        bool m_finish;
 };
 
 #endif

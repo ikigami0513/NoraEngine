@@ -14,10 +14,12 @@ class Component {
         virtual ~Component() = default;
 
         // Optional start method
-        virtual void Start() {};
+        virtual void Start() {}
 
         // Optional update method
-        virtual void Update() {};
+        virtual void Update() {}
+
+        virtual void OnCollisionEnter(Entity* entity) {}
 
         // Getter for owner
         Entity* GetOwner() const {

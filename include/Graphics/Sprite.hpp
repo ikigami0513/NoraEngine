@@ -34,6 +34,8 @@ public:
      */
     void SetTextureRect(float pixel_x, float pixel_y, float pixel_width, float pixel_height);
 
+    glm::vec4 GetTextureRect() const;
+
 private:
     void SetupMesh();
     /**

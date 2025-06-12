@@ -12,6 +12,7 @@ def init_fps_display():
     font = Font("../resources/fonts/Antonio-Regular.ttf", 16)
     fps_text = Text()
     fps_text.font = font
+    fps_text.alignement = Alignment.Left
     fps_text.color = Color(1.0, 1.0, 1.0)
     fps_text.text = f"{Time.fps} FPS"
     fps_text.set_owner(fps_entity)

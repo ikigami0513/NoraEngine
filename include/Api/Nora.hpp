@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pybind11/embed.h>
 #include <pybind11/operators.h>
+#include <pybind11/functional.h>
 #include "Core/Time.hpp"
 #include "Core/Input.hpp"
 #include "Core/Mouse.hpp"
@@ -18,9 +19,12 @@
 #include "World/Mesh/SphereMesh.hpp"
 #include "World/Mesh/CapsuleMesh.hpp"
 #include "World/Mesh/3DModel/Model.hpp"
+#include "Physics/RectCollider.hpp"
 #include "Gui/Font.hpp"
 #include "Gui/GuiComponent.hpp"
 #include "Gui/Text.hpp"
+#include "Gui/Rectangle.hpp"
+#include "Gui/Button.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Api/PythonComponentWrapper.hpp"
@@ -73,7 +77,7 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
             }
             return glm::vec2(0.0f, 0.0f);
         }, "Return a normalized copy of the vector")
-        .def("__repr__", [](const glm::vec3& v) {
+        .def("__repr__", [](const glm::vec2& v) {
             return "<Vec2 x=" + std::to_string(v.x) + " y=" + std::to_string(v.y) + ">";
         });
 
@@ -293,6 +297,7 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def(py::init<>())
         .def("start", &Component::Start)
         .def("update", &Component::Update)
+        .def("on_collision_enter", &Component::OnCollisionEnter)
         .def("set_owner", &Component::SetOwner)
         .def_property_readonly("owner", [](const Component& self) {
             return self.GetOwner();
@@ -375,6 +380,12 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
 
         py::class_<GuiComponent, Component, std::shared_ptr<GuiComponent>>(m, "GuiComponent");
 
+        py::enum_<Alignment>(m, "Alignment")
+            .value("Left", Alignment::Left)
+            .value("Center", Alignment::Center)
+            .value("Right", Alignment::Right)
+            .export_values();
+
         py::class_<Text, GuiComponent, std::shared_ptr<Text>>(m, "Text")
             .def(py::init<>())
             .def_property("font",
@@ -392,7 +403,54 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
             .def_property("color",
                 [](const Text& self) { return self.color; },
                 [](Text& self, const Color& new_color) { self.color = new_color; },
-                "The color of the text.");
+                "The color of the text.")
+            .def_property("margin",
+                [](const Text& self) { return self.margin; },
+                [](Text& self, const float new_margin) { self.margin = new_margin; }
+            )
+            .def_property("alignement",
+                [](const Text& self) { return self.alignmenent; },
+                [](Text& self, Alignment new_alignement) { self.alignmenent = new_alignement; }
+            )
+            .def("get_text_bounds", &Text::GetTextBounds, py::arg("scale") = 1.0f);
+
+        py::class_<Rectangle, GuiComponent, std::shared_ptr<Rectangle>>(m, "Rectangle")
+            .def(py::init<Color, float, float>(), py::arg("color") = Color(1.0f, 1.0f, 1.0f, 1.0f), py::arg("width") = 100.0f, py::arg("height") = 50.0f)
+            .def_property(
+                "color",
+                &Rectangle::GetColor,
+                &Rectangle::SetColor
+            )
+            .def_property(
+                "width",
+                &Rectangle::GetWidth,
+                &Rectangle::SetWidth
+            )
+            .def_property(
+                "height",
+                &Rectangle::GetHeight,
+                &Rectangle::SetHeight
+            );
+
+        py::class_<RectCollider, Component, std::shared_ptr<RectCollider>>(m, "RectCollider")
+            .def(py::init<>());
+
+        py::class_<Button, Component, std::shared_ptr<Button>>(m, "Button")
+            .def(py::init<>())
+            .def_property("hovered_color",
+                [](const Button& self) { return self.m_hoveredColor; },
+                [](Button& self, const Color& color) { self.m_hoveredColor = color; },
+                "La couleur du bouton lorsqu'il est survolé par la souris.")
+            .def_property("on_click_color",
+                [](const Button& self) { return self.m_onClickColor; },
+                [](Button& self, const Color& color) { self.m_onClickColor = color; },
+                "La couleur du bouton lorsqu'il est cliqué.")
+            .def_property("on_click",
+                nullptr,
+                [](Button& self, const std::function<void()>& func) {
+                    self.OnClick = func;
+                }
+            );
 
         py::class_<Sprite, Component, std::shared_ptr<Sprite>>(m, "Sprite")
             .def(py::init<>())
@@ -400,11 +458,32 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
 
         py::class_<Animation2D, Component, std::shared_ptr<Animation2D>>(m, "Animation2D")
             .def(
-                py::init<int, int, int, int, int>(),
+                py::init<int, int, int, int, int, bool>(),
                 py::arg("width"),
                 py::arg("height"),
                 py::arg("current_row"),
                 py::arg("frames_count"),
-                py::arg("animation_speed")
+                py::arg("animation_speed"),
+                py::arg("repeat") = true
+            )
+            .def_property(
+                "repeat",
+                &Animation2D::GetRepeat,
+                &Animation2D::SetRepeat
+            )
+            .def_property(
+                "finish",
+                &Animation2D::GetFinish,
+                &Animation2D::SetFinish
+            )
+            .def_property(
+                "current_frame",
+                &Animation2D::GetCurrentFrame,
+                &Animation2D::SetCurrentFrame
+            )
+            .def_property(
+                "frames_count",
+                &Animation2D::GetFramesCount,
+                &Animation2D::SetFramesCount
             );
 }

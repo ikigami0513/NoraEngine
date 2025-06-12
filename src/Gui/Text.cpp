@@ -31,6 +31,10 @@ void Text::SetupMesh() {
 }
 
 void Text::Render(Shader& shader) {
+    if (!font || text.empty()) {
+        return;
+    }
+
     GL_CHECK_ERROR("Text::Render - Start");
 
     // Save OpenGL state
@@ -58,8 +62,18 @@ void Text::Render(Shader& shader) {
     glm::vec3 owner_position = m_owner->GetTransform().GetLocalPosition();
     glm::vec3 owner_scale = m_owner->GetTransform().GetLocalScale();
 
+    glm::vec2 text_bounds = GetTextBounds(owner_scale.x);
+
     float cursor_x = owner_position.x; // Position x de départ du texte
-    float baseline_y = owner_position.y; // Position y de la ligne de base du texte
+    float baseline_y = owner_position.y + text_bounds.y / 4.0f - margin; // Position y de la ligne de base du texte
+
+    if (alignmenent == Alignment::Center) {
+        cursor_x -= text_bounds.x / 2.0f;
+    }
+    else if (alignmenent == Alignment::Right) {
+        cursor_x -= text_bounds.x;
+    }
+    // Pour Alignment::Left, on ne fait rien, cursor_x est déjà correct.
 
     glActiveTexture(GL_TEXTURE0);
     GL_CHECK_ERROR("Text::Render - After glActiveTexture(GL_TEXTURE0)");
@@ -136,4 +150,31 @@ void Text::Render(Shader& shader) {
     if (!wasBlendEnabled) glDisable(GL_BLEND);
     if (!wasCullFaceEnabled) glDisable(GL_CULL_FACE); 
     GL_CHECK_ERROR("Text::Render - After restoring GL state");
+}
+
+std::string Text::ShaderType() {
+    return "text";
+}
+
+glm::vec2 Text::GetTextBounds(float scale) {
+    if (!font || text.empty()) {
+        return glm::vec2(0.0f, 0.0f);
+    }
+
+    float width = 0.0f;
+    float height = 0.0f;
+
+    for (const char& char_code : this->text) {
+        auto it = font->Characters.find(char_code);
+        if (it == font->Characters.end()) continue;
+        const Character& ch = it->second;
+
+        width += (ch.Advance >> 6) * scale;
+
+        if (ch.Size.y * scale > height) {
+            height = ch.Size.y * scale;
+        }
+    }
+
+    return glm::vec2(width, height);
 }

@@ -78,9 +78,10 @@ void Window::InitFreeType() {
 
 void Window::Setup() {
     AssetsManager::AddShader("mesh", std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl"));
-    AssetsManager::AddShader("gui", std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl"));
+    AssetsManager::AddShader("text", std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl"));
     AssetsManager::AddShader("3d_model", std::make_unique<Shader>("../resources/shaders/3d_model/vert.glsl", "../resources/shaders/3d_model/frag.glsl"));
     AssetsManager::AddShader("sprite", std::make_unique<Shader>("../resources/shaders/sprite/vert.glsl", "../resources/shaders/sprite/frag.glsl"));
+    AssetsManager::AddShader("shape", std::make_unique<Shader>("../resources/shaders/shape/vert.glsl", "../resources/shaders/shape/frag.glsl"));
 }
 
 void Window::ProcessInput() {
@@ -111,7 +112,6 @@ void Window::Render() {
 }
 
 void Window::Shutdown() {
-    delete &m_scene;
     m_game = std::make_unique<py::object>(); // Reset to null object
 }
 

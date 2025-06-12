@@ -12,6 +12,7 @@ class PythonComponentWrapper : public Component {
 
         void Start() override;
         void Update() override;
+        void OnCollisionEnter(Entity* other) override;
 
         py::object PyComponent() const;
 

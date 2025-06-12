@@ -83,6 +83,31 @@ class Entity {
             return nullptr;
         }
 
+    template<typename T>
+    std::vector<T*> GetComponents() const {
+        std::vector<T*> found_components;
+        for (const auto& comp_ptr : m_components) {
+            if (T* specific_comp = dynamic_cast<T*>(comp_ptr.get())) {
+                found_components.push_back(specific_comp);
+            }
+
+            if (PythonComponentWrapper* wrapper = dynamic_cast<PythonComponentWrapper*>(comp_ptr.get())) {
+                py::object py_obj = wrapper->PyComponent();
+                if (py_obj && !py_obj.is_none()) {
+                    try {
+                        if (py::isinstance<T>(py_obj)) {
+                            found_components.push_back(py_obj.cast<T*>());
+                        }
+                    } catch (const py::cast_error& e) {
+                        std::cerr << "Pybind11 cast error in Entity::GetComponent<T>: " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+
+        return found_components;
+    }
+
     void Start() {
         for (auto& component: m_components) {
             try {
@@ -122,6 +147,17 @@ class Entity {
         // Update children
         for (auto& child: m_children) {
             child->Update();
+        }
+    }
+
+    void OnCollisionEnter(Entity* other) {
+        for (auto& component : m_components) {
+            try {
+                component->OnCollisionEnter(other);
+            }
+            catch(const py::cast_error& e) {
+                std::cerr << "Error while calling component On Collision Enter" << std::endl;
+            }
         }
     }
 };

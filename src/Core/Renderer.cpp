@@ -53,14 +53,15 @@ bool Renderer::Rendering2D(Scene scene, int width, int height) {
 void Renderer::RenderingGUI(Scene scene, int width, int height) {
     // render gui
     glm::mat4 ortho_projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f);
-    Shader* guiShader = AssetsManager::GetShader("gui");
-    guiShader->Use();
-    guiShader->SetMat4("projection", ortho_projection);
 
     std::vector<Entity*> guiEntities = scene.GetEntitiesWithComponent<GuiComponent>();
     for (auto entity : guiEntities) {
-        GuiComponent* gui = entity->GetComponent<GuiComponent>();
-        Shader* shader = AssetsManager::GetShader(gui->ShaderType());
-        gui->Render(*shader);
+        std::vector<GuiComponent*> guis = entity->GetComponents<GuiComponent>();
+        for (const auto& gui : guis) {
+            Shader* shader = AssetsManager::GetShader(gui->ShaderType());
+            shader->Use();
+            shader->SetMat4("projection", ortho_projection);
+            gui->Render(*shader);
+        }
     }
 }

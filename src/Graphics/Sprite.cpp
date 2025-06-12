@@ -152,6 +152,10 @@ void Sprite::SetTextureRect(float pixel_x, float pixel_y, float pixel_width, flo
     }
 }
 
+glm::vec4 Sprite::GetTextureRect() const {
+    return m_currentTextureRectNormalized;
+}
+
 void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
     if (m_texture == nullptr) {
         Debug::Error("Sprite::Render: No Texture linked to Sprite.");
