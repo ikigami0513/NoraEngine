@@ -53,6 +53,13 @@ def create_2d_world():
 
     Window.scene.add_entity(button_entity)
 
+    music_entity = Entity()
+    music = MusicComponent()
+    music.music_path = "../resources/audio/music/contemplative.wav"
+    music.set_owner(music_entity)
+    music_entity.add_component(music)
+    Window.scene.add_entity(music_entity)
+
     global camera_entity
     camera_entity = Entity()
     camera_entity.transform.local_position = Vec3(0.0, 0.0, 0.0)
@@ -97,6 +104,11 @@ def create_2d_world():
     health = StatComponent()
     health.set_owner(player_entity)
     player_entity.add_component(health)
+
+    sword_whoosh = SoundComponent()
+    sword_whoosh.sound_path = "../resources/audio/sword/whoosh.wav"
+    sword_whoosh.set_owner(player_entity)
+    player_entity.add_component(sword_whoosh)
 
     player = PlayerComponent()
     player.text = text

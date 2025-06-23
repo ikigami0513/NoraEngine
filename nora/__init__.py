@@ -23,3 +23,6 @@ from nora.physics.offset import Offset
 
 from nora.world.ecs import Component, Entity
 from nora.world.scene import Scene
+
+from nora.audio.sound_component import SoundComponent
+from nora.audio.music_component import MusicComponent

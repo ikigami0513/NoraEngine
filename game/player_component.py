@@ -26,6 +26,7 @@ class PlayerComponent(Component):
         self.direction = PlayerDirection.DOWN
         self.sprite = self.owner.get_component(Sprite)
         self.animation = self.owner.get_component(Animation2D)
+        self.sword_whoosh_sound = self.owner.get_component(SoundComponent)
         self.velocity = Vec2(0.0, 0.0)
         self.speed = 50.0
         self.attack_cycle = 1
@@ -81,6 +82,7 @@ class PlayerComponent(Component):
                 self.sprite.texture = self.textures[f"{self.state.value}{self.attack_cycle}_{self.direction.value}"]
                 self.animation.current_frame = 0.0
                 self.animation.repeat = False
+                self.sword_whoosh_sound.play()
             else:
                 if self.velocity.x != 0 or self.velocity.y != 0:
                     self.velocity = self.velocity.normalized()
@@ -100,6 +102,7 @@ class PlayerComponent(Component):
                 if self.repeat_attack and self.attack_cycle == 1:
                     self.attack_cycle = 2
                     self.sprite.texture = self.textures[f"{self.state.value}{self.attack_cycle}_{self.direction.value}"]
+                    self.sword_whoosh_sound.play()
                 else:
                     self.repeat_attack = False
                     self.attack_cycle = 1

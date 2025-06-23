@@ -57,6 +57,7 @@ class Window {
         void InitGLFW();
         void CreateWindow();
         void InitGLAD();
+        void InitRaudio();
         void InitFreeType();
         void Setup();
         void ProcessInput();

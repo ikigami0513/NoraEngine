@@ -8,6 +8,8 @@
 #include "Gui/GuiComponent.hpp"
 #include "Graphics/2D/Sprite.hpp"
 #include "Core/Input/Mouse.hpp"
+#include "Utils/Debug.hpp"
+#include <raudio.h>
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -69,6 +71,14 @@ void Window::InitGLAD() {
     }
 }
 
+void Window::InitRaudio() {
+    InitAudioDevice();
+
+    if (!IsAudioDeviceReady()) {
+        Debug::Error("Error: The audio device is not ready.");
+    }
+}
+
 void Window::InitFreeType() {
     // All functions return a value different than 0 whenever an error occured
     if (FT_Init_FreeType(&m_ft)) {
@@ -119,6 +129,7 @@ void Window::Run() {
     InitGLFW();
     CreateWindow();
     InitGLAD();
+    InitRaudio();
     InitFreeType();
     glfwSwapInterval(0);
     glEnable(GL_DEPTH_TEST);

@@ -27,6 +27,8 @@
 #include "Gui/Text.hpp"
 #include "Gui/Rectangle.hpp"
 #include "Gui/Button.hpp"
+#include "Audio/SoundComponent.hpp"
+#include "Audio/MusicComponent.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Api/PythonComponentWrapper.hpp"
@@ -501,4 +503,13 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
                 &Animation2D::GetFramesCount,
                 &Animation2D::SetFramesCount
             );
+
+        py::class_<SoundComponent, Component, std::shared_ptr<SoundComponent>>(m, "SoundComponent")
+            .def(py::init<>())
+            .def_property("sound_path", &SoundComponent::GetSoundPath, &SoundComponent::SetSoundPath)
+            .def("play", &SoundComponent::Play);
+
+        py::class_<MusicComponent, Component, std::shared_ptr<MusicComponent>>(m, "MusicComponent")
+            .def(py::init<>())
+            .def_property("music_path", &MusicComponent::GetMusicPath, &MusicComponent::SetMusicPath);
 }
