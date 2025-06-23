@@ -5,8 +5,16 @@ out vec4 FragColor;
 
 uniform sampler2D image;
 uniform vec4 spriteColor; // couleur pour teinter le sprite
+uniform int useTexture;
 
 void main() {
-    vec4 texColor = texture(image, TexCoords);
-    FragColor = texColor * spriteColor;
+    if (useTexture == 1) {
+        FragColor = texture(image, TexCoords) * spriteColor;
+    }
+    else {
+        FragColor = spriteColor;
+    }
+
+    if (FragColor.a < 0.01)
+        discard;
 }

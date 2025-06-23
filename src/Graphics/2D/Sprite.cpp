@@ -2,6 +2,7 @@
 #include "ECS/Entity.hpp"
 #include "Utils/Utils.hpp"  // Assuming GL_CHECK_ERROR might be here or in Debug
 #include "Utils/Debug.hpp"  // For Debug::Error, Debug::Warning
+#include "Graphics/2D/Animation2D.hpp"
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream> // For std::cout in Render, can be removed if Debug handles all messages
@@ -43,10 +44,9 @@ void Sprite::InitializeVertices(float u_min, float v_min, float u_max, float v_m
     m_vertices[28] = u_min; m_vertices[29] = v_min;
 }
 
-Sprite::Sprite() {
+Sprite::Sprite() : m_color(1.0f, 1.0f, 1.0f, 1.0f) {
     // Initialize with default texture coordinates (full texture)
     InitializeVertices(0.0f, 0.0f, 1.0f, 1.0f);
-    // m_currentTextureRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); // If using m_currentTextureRect
 }
 
 Sprite::~Sprite() {
@@ -90,7 +90,9 @@ void Sprite::SetupMesh() {
 
 void Sprite::Start() {
     SetupMesh(); // Now uses m_vertices which might have been set by SetTextureRect before Start
-    SetTextureRect(0.0f, 0.0f, m_texture->Width(), m_texture->Height());
+    if (m_texture) {
+        SetTextureRect(0.0f, 0.0f, m_texture->Width(), m_texture->Height());
+    }
     GL_CHECK_ERROR("SetupMesh");
 }
 
@@ -186,10 +188,16 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
     shader.Use();
     GL_CHECK_ERROR("Shader.Use");
 
-    // Texture binding
-    m_texture->Bind(0); // Assuming texture unit 0
-    shader.SetInt("image", 0); // Tell shader to use texture unit 0
-    GL_CHECK_ERROR("Texture bind + SetInt(image)");
+    bool hasTexture = (m_texture != nullptr);
+
+    shader.SetInt("useTexture", hasTexture);
+
+    if (hasTexture) {
+        // Texture binding
+        m_texture->Bind(0); // Assuming texture unit 0
+        shader.SetInt("image", 0); // Tell shader to use texture unit 0
+        GL_CHECK_ERROR("Texture bind + SetInt(image)");
+    }
     
     // Model matrix: m_owner is the Entity this component is attached to.
     // GetLocalModelMatrix2D might need adjustment if sprite size should depend on texture rect portion.
@@ -199,7 +207,7 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
     shader.SetMat4("projection", projectionMatrix);
     
     // Default sprite color, can be parameterized if needed
-    shader.SetVec4("spriteColor", glm::vec4(1.0f)); 
+    shader.SetVec4("spriteColor", m_color); 
     GL_CHECK_ERROR("Uniform updates");
 
     glBindVertexArray(m_VAO);
@@ -207,8 +215,10 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
     glBindVertexArray(0);
     GL_CHECK_ERROR("glDrawArrays");
 
-    m_texture->Unbind(0);
-    GL_CHECK_ERROR("Texture unbind");
+    if (hasTexture) {
+        m_texture->Unbind(0);
+        GL_CHECK_ERROR("Texture unbind");
+    }
 
     // Restore previous OpenGL state
     if (wasDepthTestEnabled) glEnable(GL_DEPTH_TEST);

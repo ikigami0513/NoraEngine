@@ -19,6 +19,9 @@ public:
 
     void SetTexture(std::shared_ptr<Texture> texture) {
         m_texture = std::move(texture);
+        if (m_texture) {
+            m_color = glm::vec4(1.0f);
+        }
     }
 
     std::shared_ptr<Texture> GetTexture() {
@@ -36,6 +39,21 @@ public:
 
     glm::vec4 GetTextureRect() const;
 
+    // --- NOUVEAU: Méthodes pour la Couleur ---
+    /**
+     * @brief Définit la couleur du sprite.
+     * Si une texture est présente, cette couleur agira comme une teinte.
+     * Si aucune texture n'est définie, le sprite sera un rectangle plein de cette couleur.
+     * @param color La couleur au format RGBA.
+     */
+    void SetColor(const glm::vec4& color) { m_color = color; }
+
+    /**
+     * @brief Récupère la couleur actuelle du sprite.
+     * @return La couleur au format RGBA.
+     */
+    const glm::vec4& GetColor() const { return m_color; }
+
 private:
     void SetupMesh();
     /**
@@ -52,6 +70,7 @@ private:
     // glm::vec4 m_currentTextureRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
     glm::vec4 m_currentTextureRectNormalized;
+    glm::vec4 m_color;
 };
 
 #endif

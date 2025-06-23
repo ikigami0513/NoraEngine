@@ -64,7 +64,7 @@ def create_2d_world():
     global player_entity
     player_entity = Entity()
     size = Window.get_size()
-    player_entity.transform.local_position = Vec3(0.0, 0.0, 0.0)
+    player_entity.transform.local_position = Vec3(0.0, 500.0, 0.0)
     player_entity.transform.local_scale = Vec3(2.5, 2.5, 0.0)
     sprite = Sprite()
     sprite.texture = Texture("../resources/textures/player/idle/idle_down.png")
@@ -105,19 +105,19 @@ def create_2d_world():
 
     Window.scene.add_entity(player_entity)
 
-    face_entity = Entity()
-    face_entity.transform.local_position = Vec3(500.0, 150.0, 0.0)
-    face_entity.transform.local_scale = Vec3(0.2, 0.2, 0.0)
-    face_sprite = Sprite()
-    face_sprite.texture = Texture("../resources/textures/container.jpg")
-    face_sprite.set_owner(face_entity)
-    face_entity.add_component(face_sprite)
+    container_entity = Entity()
+    container_entity.transform.local_position = Vec3(500.0, 150.0, 0.0)
+    container_entity.transform.local_scale = Vec3(0.2, 0.2, 0.0)
+    container_sprite = Sprite()
+    container_sprite.texture = Texture("../resources/textures/container.jpg")
+    container_sprite.set_owner(container_entity)
+    container_entity.add_component(container_sprite)
 
     face_collider = RectCollider()
-    face_collider.set_owner(face_entity)
-    face_entity.add_component(face_collider)
+    face_collider.set_owner(container_entity)
+    container_entity.add_component(face_collider)
 
-    Window.scene.add_entity(face_entity)
+    Window.scene.add_entity(container_entity)
 
 
 def initialize() -> None:
