@@ -105,19 +105,21 @@ def create_2d_world():
 
     Window.scene.add_entity(player_entity)
 
-    container_entity = Entity()
-    container_entity.transform.local_position = Vec3(500.0, 150.0, 0.0)
-    container_entity.transform.local_scale = Vec3(0.2, 0.2, 0.0)
-    container_sprite = Sprite()
-    container_sprite.texture = Texture("../resources/textures/container.jpg")
-    container_sprite.set_owner(container_entity)
-    container_entity.add_component(container_sprite)
+    container_texture = Texture("../resources/textures/container.jpg")
+    for i in range(10):
+        container_entity = Entity()
+        container_entity.transform.local_scale = Vec3(0.2, 0.2, 0.0)
+        container_entity.transform.local_position = Vec3(500.0, container_texture.height * container_entity.transform.local_scale.y * i, 0.0)
+        container_sprite = Sprite()
+        container_sprite.texture = container_texture
+        container_sprite.set_owner(container_entity)
+        container_entity.add_component(container_sprite)
 
-    face_collider = RectCollider()
-    face_collider.set_owner(container_entity)
-    container_entity.add_component(face_collider)
+        face_collider = RectCollider()
+        face_collider.set_owner(container_entity)
+        container_entity.add_component(face_collider)
 
-    Window.scene.add_entity(container_entity)
+        Window.scene.add_entity(container_entity)
 
 
 def initialize() -> None:

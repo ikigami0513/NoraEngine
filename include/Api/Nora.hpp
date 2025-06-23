@@ -348,7 +348,9 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         });
 
         py::class_<Texture, std::shared_ptr<Texture>>(m, "Texture")
-            .def(py::init<const std::string&, bool>(), py::arg("path"), py::arg("flip_vertically") = false);
+            .def(py::init<const std::string&, bool>(), py::arg("path"), py::arg("flip_vertically") = false)
+            .def_property_readonly("width", [](Texture& self) { return self.Width(); })
+            .def_property_readonly("height", [](Texture& self) { return self.Height(); });
 
         py::class_<Font, std::shared_ptr<Font>>(m, "Font")
             .def(py::init<const std::string&, unsigned int>(), py::arg("font_path"), py::arg("font_size") = 48);

@@ -14,7 +14,7 @@ public:
     ~Sprite();
 
     void Start() override;
-    void Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void Render(Shader& shader);
     std::string ShaderType();
 
     void SetTexture(std::shared_ptr<Texture> texture) {

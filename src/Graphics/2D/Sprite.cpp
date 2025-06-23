@@ -158,7 +158,7 @@ glm::vec4 Sprite::GetTextureRect() const {
     return m_currentTextureRectNormalized;
 }
 
-void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void Sprite::Render(Shader& shader) {
     if (m_texture == nullptr) {
         Debug::Error("Sprite::Render: No Texture linked to Sprite.");
         return;
@@ -167,26 +167,6 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
         Debug::Error("Sprite::Render: VAO not initialized. Was Start() called?");
         return;
     }
-
-    // Save OpenGL state
-    GLboolean wasDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
-    GLboolean wasCullFaceEnabled = glIsEnabled(GL_CULL_FACE);
-    GLint oldBlendSrcAlpha, oldBlendDstAlpha, oldBlendEquationAlpha; // For more precise blend state restoration
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &oldBlendSrcAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &oldBlendDstAlpha);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &oldBlendEquationAlpha);
-
-
-    // Prepare for sprite rendering
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_CULL_FACE); // Keeps culling enabled, ensure your quad winding is correct
-    GL_CHECK_ERROR("Sprite render state setup");
-
-    shader.Use();
-    GL_CHECK_ERROR("Shader.Use");
 
     bool hasTexture = (m_texture != nullptr);
 
@@ -203,8 +183,6 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
     // GetLocalModelMatrix2D might need adjustment if sprite size should depend on texture rect portion.
     // For now, it scales a unit quad based on the Entity's transform.
     shader.SetMat4("model", m_owner->GetTransform().GetLocalModelMatrix2D(m_texture, m_currentTextureRectNormalized));
-    shader.SetMat4("view", viewMatrix);
-    shader.SetMat4("projection", projectionMatrix);
     
     // Default sprite color, can be parameterized if needed
     shader.SetVec4("spriteColor", m_color); 
@@ -219,20 +197,6 @@ void Sprite::Render(Shader& shader, const glm::mat4& viewMatrix, const glm::mat4
         m_texture->Unbind(0);
         GL_CHECK_ERROR("Texture unbind");
     }
-
-    // Restore previous OpenGL state
-    if (wasDepthTestEnabled) glEnable(GL_DEPTH_TEST);
-    else glDisable(GL_DEPTH_TEST);
-
-    if (!wasBlendEnabled) glDisable(GL_BLEND);
-    else {
-        // Restore specific blend func if it was more complex or different
-        glBlendFuncSeparate(oldBlendSrcAlpha, oldBlendDstAlpha, oldBlendSrcAlpha, oldBlendDstAlpha); // Or simply glBlendFunc
-        // Could also restore GL_BLEND_EQUATION if changed
-    }
-    
-    if (!wasCullFaceEnabled) glDisable(GL_CULL_FACE);
-    GL_CHECK_ERROR("Restore OpenGL state");
 }
 
 std::string Sprite::ShaderType() {
