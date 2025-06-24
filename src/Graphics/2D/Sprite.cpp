@@ -171,13 +171,6 @@ void Sprite::Render(Shader& shader) {
     bool hasTexture = (m_texture != nullptr);
 
     shader.SetInt("useTexture", hasTexture);
-
-    if (hasTexture) {
-        // Texture binding
-        m_texture->Bind(0); // Assuming texture unit 0
-        shader.SetInt("image", 0); // Tell shader to use texture unit 0
-        GL_CHECK_ERROR("Texture bind + SetInt(image)");
-    }
     
     // Model matrix: m_owner is the Entity this component is attached to.
     // GetLocalModelMatrix2D might need adjustment if sprite size should depend on texture rect portion.
@@ -192,11 +185,6 @@ void Sprite::Render(Shader& shader) {
     glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices for 2 triangles
     glBindVertexArray(0);
     GL_CHECK_ERROR("glDrawArrays");
-
-    if (hasTexture) {
-        m_texture->Unbind(0);
-        GL_CHECK_ERROR("Texture unbind");
-    }
 }
 
 std::string Sprite::ShaderType() {

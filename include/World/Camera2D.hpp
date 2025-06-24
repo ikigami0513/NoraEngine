@@ -3,6 +3,7 @@
 
 #include "ECS/Component.hpp"
 #include "Core/Time.hpp"
+#include "Utils/Math.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -19,6 +20,8 @@ class Camera2D : public Component {
         Entity* GetTarget();
         glm::mat4 GetViewMatrix() const;
         glm::mat4 GetProjectionMatrix() const;
+        AABB GetViewAABB() const;
+
         void Update() override;
 };
 

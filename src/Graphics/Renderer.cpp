@@ -59,20 +59,31 @@ bool Renderer::Rendering2D(Scene scene, int width, int height) {
 
         glm::mat4 view = camera->GetViewMatrix();
         glm::mat4 projection = camera->GetProjectionMatrix();
+        AABB viewAABB = camera->GetViewAABB();
         std::vector<Entity*> spritedEntities = scene.GetEntitiesWithComponent<Sprite>();
-        std::unordered_map<std::string, std::vector<Entity*>> entitiesByShader;
+        std::unordered_map<std::string, std::unordered_map<std::string, std::vector<Entity*>>> entitiesByShaderByTexture;
 
         for (Entity* entity : spritedEntities) {
             Sprite* sprite = entity->GetComponent<Sprite>();
             if (!sprite) continue;
 
+            AABB spriteAABB = sprite->GetWorldAABB();
+            if (!viewAABB.Intersects(spriteAABB)) continue;
+
             std::string shaderType = sprite->ShaderType();
-            entitiesByShader[shaderType].push_back(entity);
+            Texture* texture = sprite->GetTexture().get();
+            if (texture) {
+                entitiesByShaderByTexture[shaderType][sprite->GetTexture()->Path()].push_back(entity);
+            }
+            else {
+                entitiesByShaderByTexture[shaderType]["no_texture"].push_back(entity);
+            }
         }
 
-        for (const auto& pair : entitiesByShader) {
+        for (const auto& pair : entitiesByShaderByTexture) {
             const std::string& shaderType = pair.first;
-            const std::vector<Entity*>& entities = pair.second;
+            const std::unordered_map<std::string, std::vector<Entity*>> entitiesByTexture = pair.second;
+
             Shader* shader = AssetsManager::GetShader(shaderType);
             shader->Use();
 
@@ -84,10 +95,18 @@ bool Renderer::Rendering2D(Scene scene, int width, int height) {
                 continue;
             }
 
-            for (Entity* entity : entities) {
-                Sprite* sprite = entity->GetComponent<Sprite>();
-                if (!sprite) continue;
-                sprite->Render(*shader);
+            for (const auto& pair : entitiesByTexture) {
+                std::shared_ptr<Texture> texture = pair.second[0]->GetComponent<Sprite>()->GetTexture();
+                Debug::Info("Bind texture " + texture->Path());
+                texture->Bind(0);
+                shader->SetInt("image", 0);
+
+                for (Entity* entity : pair.second) {
+                    Sprite* sprite = entity->GetComponent<Sprite>();
+                    sprite->Render(*shader);
+                }
+
+                texture->Unbind(0);
             }
         }
 

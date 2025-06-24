@@ -32,6 +32,14 @@ glm::mat4 Camera2D::GetProjectionMatrix() const {
     );
 }
 
+AABB Camera2D::GetViewAABB() const {
+    std::pair<int, int> size = Window::GetInstance().GetSize();
+    glm::vec2 halfSize = { size.first * 0.5, size.second * 0.5 };
+    glm::vec3 position = m_owner->GetTransform().GetLocalPosition();
+    glm::vec2 center = { position.x + halfSize.x, position.y + halfSize.y };
+    return { center - halfSize, center + halfSize};
+}
+
 void Camera2D::Update() {
     if (m_target != nullptr) {
         glm::vec3 targetPos = m_target->GetTransform().GetLocalPosition();

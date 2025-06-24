@@ -5,8 +5,10 @@
 #include <glm/glm.hpp> // Include for glm::vec4
 
 #include "ECS/Component.hpp"
+#include "ECS/Entity.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
+#include "Utils/Math.hpp"
 
 class Sprite : public Component {
 public:
@@ -53,6 +55,14 @@ public:
      * @return La couleur au format RGBA.
      */
     const glm::vec4& GetColor() const { return m_color; }
+
+    AABB GetWorldAABB() const {
+        glm::vec3 position = m_owner->GetTransform().GetLocalPosition();
+        glm::vec2 pos = { position.x, position.y };
+        glm::vec2 size = { m_texture->Width(), m_texture->Height() };
+        glm::vec2 halfSize = size * 0.5f;
+        return { pos - halfSize, pos + halfSize };
+    }
 
 private:
     void SetupMesh();

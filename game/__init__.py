@@ -118,7 +118,7 @@ def create_2d_world():
     Window.scene.add_entity(player_entity)
 
     container_texture = Texture("../resources/textures/container.jpg")
-    for i in range(10):
+    for i in range(50):
         container_entity = Entity()
         container_entity.transform.local_scale = Vec3(0.2, 0.2, 0.0)
         container_entity.transform.local_position = Vec3(500.0, container_texture.height * container_entity.transform.local_scale.y * i, 0.0)
