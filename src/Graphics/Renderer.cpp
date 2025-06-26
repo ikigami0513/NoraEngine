@@ -5,10 +5,211 @@
 #include "Utils/Debug.hpp"
 #include "Utils/Utils.hpp"
 #include "Graphics/3D/Mesh/RenderComponent.hpp"
-#include "Graphics/2D/Sprite.hpp"
 #include "Core/AssetsManager.hpp"
 #include "Gui/GuiComponent.hpp"
-#include <unordered_map>
+#include <algorithm>
+
+Renderer::Renderer() {
+    Init2DBatching();
+}
+
+Renderer::~Renderer() {
+    Shutdown2DBatching();
+}
+
+void Renderer::Init2DBatching() {
+    glGenVertexArrays(1, &m_spriteVAO);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - Gen VAO");
+
+    glGenBuffers(1, &m_spriteVBO);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - Gen VBO");
+
+    glBindVertexArray(m_spriteVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_spriteVBO);
+
+    // Alloue l'espace pour le VBO, mais ne met pas encore de données.
+    // GL_DYNAMIC_DRAW car les données changeront chaque frame.
+    glBufferData(GL_ARRAY_BUFFER, MAX_BATCH_VERTICES * sizeof(SpriteVertex), nullptr, GL_DYNAMIC_DRAW);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - BufferData allocation");
+
+    // Définition des attributs du sommet pour SpriteVertex
+    // Position (location 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void*)offsetof(SpriteVertex, position));
+    glEnableVertexAttribArray(0);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - Position attribute");
+
+    // Texture Coordinates (location 1)
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void*)offsetof(SpriteVertex, texCoords));
+    glEnableVertexAttribArray(1);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - TexCoords attribute");
+
+    // Color (location 2)
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void*)offsetof(SpriteVertex, color));
+    glEnableVertexAttribArray(2);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - Color attribute");
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    GL_CHECK_ERROR("Renderer::Init2DBatching - Unbind VAO/VBO final");
+
+    // Pré-alloue l'espace pour le buffer CPU
+    m_batchVerticesBuffer.reserve(MAX_BATCH_VERTICES);
+}
+
+void Renderer::Shutdown2DBatching() {
+    if (m_spriteVAO != 0) {
+        glDeleteVertexArrays(1, &m_spriteVAO);
+        GL_CHECK_ERROR("Renderer::Shutdown2DBatching - delete VAO");
+        m_spriteVAO = 0;
+    }
+    if (m_spriteVBO != 0) {
+        glDeleteBuffers(1, &m_spriteVBO);
+        GL_CHECK_ERROR("Renderer::Shutdown2DBatching - delete VBO");
+        m_spriteVBO = 0;
+    }
+    if (m_spriteEBO != 0) {
+        glDeleteBuffers(1, &m_spriteEBO);
+        GL_CHECK_ERROR("Renderer::Shutdown2DBatching - delete EBO");
+        m_spriteEBO = 0;
+    }
+}
+
+void Renderer::AddSpriteToBatch(Sprite* sprite, Shader* shader, const glm::mat4& view, const glm::mat4& projection) {
+    if (sprite == nullptr) return;
+
+    std::shared_ptr<Texture> texture = sprite->GetTexture();
+
+    // Si le VBO est plein, on vide le batch et on recommence
+    if (m_numBatchedVertices + 6 > MAX_BATCH_VERTICES) {
+        FlushBatch(shader, view, projection);
+    }
+
+    // Récupère les données des sommets du sprite, déjà transformées et colorées
+    std::array<SpriteVertex, 6> spriteVertices = sprite->GetVerticesData();
+
+    // Ajoute les sommets au buffer temporaire CPU
+    for (int i = 0; i < 6; i++) {
+        m_batchVerticesBuffer.push_back(spriteVertices[i]);
+    }
+    m_numBatchedVertices += 6;
+}
+
+void Renderer::FlushBatch(Shader* shader, const glm::mat4& view, const glm::mat4& projection) {
+    if (m_numBatchedVertices == 0) return; // Rien à dessiner
+
+    // Active le shader
+    shader->Use();
+    shader->SetMat4("view", view);
+    shader->SetMat4("projection", projection);
+    shader->SetInt("image", 0); // Active la texture slot 0
+
+    // Bind et envoie les données au VBO
+    glBindVertexArray(m_spriteVAO);
+    GL_CHECK_ERROR("FlushBatch - After VAO Bind");
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_spriteVBO);
+    GL_CHECK_ERROR("FlushBatch - After VBO Bind");
+    
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_numBatchedVertices * sizeof(SpriteVertex), m_batchVerticesBuffer.data());
+    GL_CHECK_ERROR("FlushBatch - glBufferSubData");
+
+    // Dessine tous les sprites dans le batch
+    glDrawArrays(GL_TRIANGLES, 0, m_numBatchedVertices);
+    GL_CHECK_ERROR("FlushBatch - glDrawArrays");
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    GL_CHECK_ERROR("FlushBatch - Unbind VAO/VBO");
+
+    // Réinitialise le buffer pour le prochain batch
+    m_batchVerticesBuffer.clear();
+    m_numBatchedVertices = 0;
+    m_texturesInBatch.clear();
+}
+
+bool Renderer::Rendering2D(Scene scene, int width, int height) {
+    std::vector<Entity*> cameraEnties = scene.GetEntitiesWithComponent<Camera2D>();
+    if (!cameraEnties.empty()) {
+        Camera2D* camera = cameraEnties[0]->GetComponent<Camera2D>();
+        glm::mat4 view = camera->GetViewMatrix();
+        glm::mat4 projection = camera->GetProjectionMatrix();
+        AABB viewAABB = camera->GetViewAABB();
+
+        std::vector<Entity*> spritedEntities = scene.GetEntitiesWithComponent<Sprite>();
+
+        // Organiser les sprites par shader et puis par texture
+        // Pour un batching simple (un shader, une texture par batch), on va vider le batch
+        // chaque fois qu'on change de texture.
+        // Si vous avez un shader qui gère un tableau de samplers (texture array),
+        // alors la logique ici sera différente et vous pourrez regrouper plus de sprites.
+
+        std::map<std::string, std::map<std::string, std::vector<Sprite*>>> sortedSprites;
+
+        for (Entity* entity : spritedEntities) {
+            Sprite* sprite = entity->GetComponent<Sprite>();
+            if (!sprite) continue;
+
+            AABB spriteAABB = sprite->GetWorldAABB();
+            if (!viewAABB.Intersects(spriteAABB)) continue; // Frustum culling
+
+            std::string shaderType = sprite->ShaderType();
+            std::string textureKey = "no_texture";
+            if (sprite->GetTexture()) {
+                textureKey = sprite->GetTexture()->Path();
+            }
+            sortedSprites[shaderType][textureKey].push_back(sprite);
+        }
+
+        // Itérer sur les groupes de shaders
+        GL_CHECK_ERROR("Before Batch Rendering Loop");
+        for (auto const& [shaderType, textureGroups] : sortedSprites) {
+            Shader* currentShader = AssetsManager::GetShader(shaderType);
+            if (!currentShader) {
+                Debug::Warning("Shader \"" + shaderType + "\" not found. Skipping group.");
+                continue;
+            }
+            currentShader->Use();
+
+            // Itérer sur les groupes de textures pour ce shader
+            for (auto const& [texturePath, spritesToRender] : textureGroups) {
+                // Si la texture est présente, bindez-la. Sinon, le shader doit gérer le cas sans texture (couleur unie).
+                if (texturePath != "no_texture") {
+                    std::shared_ptr<Texture> texture = spritesToRender[0]->GetTexture();
+                    if (texture) {
+                        texture->Bind(0);
+                        currentShader->SetInt("useTexture", 1);
+                        currentShader->SetInt("image", 0);
+                    }
+                    else {
+                        Debug::Warning("Texture '" + texturePath + "' not found for sprite rendering.");
+                        currentShader->SetInt("useTexture", 0);
+                    }
+                }
+                else {
+                    currentShader->SetInt("useTexture", 0);
+                }
+
+                for (Sprite* sprite : spritesToRender) {
+                    AddSpriteToBatch(sprite, currentShader, view, projection);
+                }
+
+                FlushBatch(currentShader, view, projection);
+
+                // Unbind la texture après le batch
+                if (texturePath != "no_texture") {
+                    std::shared_ptr<Texture> texture = spritesToRender[0]->GetTexture();
+                    if (texture) {
+                        texture->Unbind(0);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
 
 bool Renderer::Rendering3D(Scene scene, int width, int height) {
     std::vector<Entity*> cameraEntities = scene.GetEntitiesWithComponent<Camera3D>();
@@ -26,103 +227,6 @@ bool Renderer::Rendering3D(Scene scene, int width, int height) {
             Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
             mesh->Render(*shader, view, projection);
         }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool Renderer::Rendering2D(Scene scene, int width, int height) {
-    std::vector<Entity*> cameraEntities = scene.GetEntitiesWithComponent<Camera2D>();
-    if (!cameraEntities.empty()) {
-        // Save OpenGL state
-        GLboolean wasDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
-        GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
-        GLboolean wasCullFaceEnabled = glIsEnabled(GL_CULL_FACE);
-        GLint oldBlendSrcAlpha, oldBlendDstAlpha, oldBlendEquationAlpha; // For more precise blend state restoration
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &oldBlendSrcAlpha);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &oldBlendDstAlpha);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &oldBlendEquationAlpha);
-
-
-        // Prepare for sprite rendering
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_CULL_FACE); // Keeps culling enabled, ensure your quad winding is correct
-        GL_CHECK_ERROR("Sprite render state setup");
-
-        GL_CHECK_ERROR("Shader.Use");
-
-        Camera2D* camera = cameraEntities[0]->GetComponent<Camera2D>();
-
-        glm::mat4 view = camera->GetViewMatrix();
-        glm::mat4 projection = camera->GetProjectionMatrix();
-        AABB viewAABB = camera->GetViewAABB();
-        std::vector<Entity*> spritedEntities = scene.GetEntitiesWithComponent<Sprite>();
-        std::unordered_map<std::string, std::unordered_map<std::string, std::vector<Entity*>>> entitiesByShaderByTexture;
-
-        for (Entity* entity : spritedEntities) {
-            Sprite* sprite = entity->GetComponent<Sprite>();
-            if (!sprite) continue;
-
-            AABB spriteAABB = sprite->GetWorldAABB();
-            if (!viewAABB.Intersects(spriteAABB)) continue;
-
-            std::string shaderType = sprite->ShaderType();
-            Texture* texture = sprite->GetTexture().get();
-            if (texture) {
-                entitiesByShaderByTexture[shaderType][sprite->GetTexture()->Path()].push_back(entity);
-            }
-            else {
-                entitiesByShaderByTexture[shaderType]["no_texture"].push_back(entity);
-            }
-        }
-
-        for (const auto& pair : entitiesByShaderByTexture) {
-            const std::string& shaderType = pair.first;
-            const std::unordered_map<std::string, std::vector<Entity*>> entitiesByTexture = pair.second;
-
-            Shader* shader = AssetsManager::GetShader(shaderType);
-            shader->Use();
-
-            shader->SetMat4("view", view);
-            shader->SetMat4("projection", projection);
-
-            if (!shader) {
-                Debug::Warning("Shader \"" + shaderType + "\" not found. Skipping group.");
-                continue;
-            }
-
-            for (const auto& pair : entitiesByTexture) {
-                std::shared_ptr<Texture> texture = pair.second[0]->GetComponent<Sprite>()->GetTexture();
-                Debug::Info("Bind texture " + texture->Path());
-                texture->Bind(0);
-                shader->SetInt("image", 0);
-
-                for (Entity* entity : pair.second) {
-                    Sprite* sprite = entity->GetComponent<Sprite>();
-                    sprite->Render(*shader);
-                }
-
-                texture->Unbind(0);
-            }
-        }
-
-        // Restore previous OpenGL state
-        if (wasDepthTestEnabled) glEnable(GL_DEPTH_TEST);
-        else glDisable(GL_DEPTH_TEST);
-
-        if (!wasBlendEnabled) glDisable(GL_BLEND);
-        else {
-            // Restore specific blend func if it was more complex or different
-            glBlendFuncSeparate(oldBlendSrcAlpha, oldBlendDstAlpha, oldBlendSrcAlpha, oldBlendDstAlpha); // Or simply glBlendFunc
-            // Could also restore GL_BLEND_EQUATION if changed
-        }
-        
-        if (!wasCullFaceEnabled) glDisable(GL_CULL_FACE);
-        GL_CHECK_ERROR("Restore OpenGL state");
 
         return true;
     }

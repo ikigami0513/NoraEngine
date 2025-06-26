@@ -12,8 +12,12 @@ class Rigidbody2D : public Component {
         void Start() override;
         void Update() override;
 
+        void SetVelocity(const glm::vec2& vel);
+        glm::vec2 GetVelocity() const;
+
     private:
-        RectCollider* m_rectCollider;
+        RectCollider* m_rectCollider = nullptr;
+        glm::vec2 m_velocity = glm::vec2(0.0f);
 };
 
 #endif

@@ -1,47 +1,36 @@
 #include "Graphics/2D/Sprite.hpp"
 #include "ECS/Entity.hpp"
-#include "Utils/Utils.hpp"  // Assuming GL_CHECK_ERROR might be here or in Debug
-#include "Utils/Debug.hpp"  // For Debug::Error, Debug::Warning
-#include "Graphics/2D/Animation2D.hpp"
-#include <glad/glad.h>
+#include "Utils/Debug.hpp"
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream> // For std::cout in Render, can be removed if Debug handles all messages
-
-// Note: The static const s_vertices array definition is removed from here.
-// m_vertices will be initialized in the constructor and updated by SetTextureRect.
+#include <algorithm>
 
 void Sprite::InitializeVertices(float u_min, float v_min, float u_max, float v_max) {
-    // Positions (quad from -0.5 to 0.5)
-    // Vertex 1 (Bottom-Left)
-    m_vertices[0] = -0.5f; m_vertices[1] = -0.5f; m_vertices[2] = 0.0f;
-    // Vertex 2 (Bottom-Right)
-    m_vertices[5] =  0.5f; m_vertices[6] = -0.5f; m_vertices[7] = 0.0f;
-    // Vertex 3 (Top-Right)
-    m_vertices[10] = 0.5f; m_vertices[11] = 0.5f; m_vertices[12] = 0.0f;
+    // Les positions locales d'un quad unitaire (-0.5 à 0.5)
+    // Sont fixes pour tous les sprites, le scaling sera appliqué par la matrice modèle.
+    // L'ordre des sommets doit correspondre à celui utilisé pour l'indexage ou le dessin non-indexé.
 
-    // Vertex 4 (Top-Right) - for second triangle
-    m_vertices[15] = 0.5f; m_vertices[16] = 0.5f; m_vertices[17] = 0.0f;
-    // Vertex 5 (Top-Left)
-    m_vertices[20] = -0.5f; m_vertices[21] = 0.5f; m_vertices[22] = 0.0f;
-    // Vertex 6 (Bottom-Left) - for second triangle
-    m_vertices[25] = -0.5f; m_vertices[26] = -0.5f; m_vertices[27] = 0.0f;
-
-    // Texture Coordinates
     // Triangle 1: (BL, BR, TR)
-    // BL UVs
-    m_vertices[3] = u_min;  m_vertices[4] = v_min;
-    // BR UVs
-    m_vertices[8] = u_max;  m_vertices[9] = v_min;
-    // TR UVs
-    m_vertices[13] = u_max; m_vertices[14] = v_max;
+    m_localVertices[0].position = glm::vec3(-0.5f, -0.5f, 0.0f); // BL
+    m_localVertices[1].position = glm::vec3( 0.5f, -0.5f, 0.0f); // BR
+    m_localVertices[2].position = glm::vec3( 0.5f,  0.5f, 0.0f); // TR
 
     // Triangle 2: (TR, TL, BL)
-    // TR UVs
-    m_vertices[18] = u_max; m_vertices[19] = v_max;
-    // TL UVs
-    m_vertices[23] = u_min; m_vertices[24] = v_max;
-    // BL UVs
-    m_vertices[28] = u_min; m_vertices[29] = v_min;
+    m_localVertices[3].position = glm::vec3( 0.5f,  0.5f, 0.0f); // TR
+    m_localVertices[4].position = glm::vec3(-0.5f,  0.5f, 0.0f); // TL
+    m_localVertices[5].position = glm::vec3(-0.5f, -0.5f, 0.0f); // BL
+
+    // Coordonnées de texture
+    // Triangle 1: (BL, BR, TR)
+    m_localVertices[0].texCoords = glm::vec2(u_min, v_min);
+    m_localVertices[1].texCoords = glm::vec2(u_max, v_min);
+    m_localVertices[2].texCoords = glm::vec2(u_max, v_max);
+
+    // Triangle 2: (TR, TL, BL)
+    m_localVertices[3].texCoords = glm::vec2(u_max, v_max);
+    m_localVertices[4].texCoords = glm::vec2(u_min, v_max);
+    m_localVertices[5].texCoords = glm::vec2(u_min, v_min);
+
+    // Les couleurs des sommets seront mises à jour dans GetVerticesData en fonction de m_color.
 }
 
 Sprite::Sprite() : m_color(1.0f, 1.0f, 1.0f, 1.0f) {
@@ -49,64 +38,20 @@ Sprite::Sprite() : m_color(1.0f, 1.0f, 1.0f, 1.0f) {
     InitializeVertices(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
-Sprite::~Sprite() {
-    if (m_VAO != 0) {
-        glDeleteVertexArrays(1, &m_VAO);
-        // GL_CHECK_ERROR("glDeleteVertexArrays"); // Optional: check error if macro is robust
-    }
-    if (m_VBO != 0) {
-        glDeleteBuffers(1, &m_VBO);
-        // GL_CHECK_ERROR("glDeleteBuffers"); // Optional
-    }
-    // It's good practice to ensure GL_CHECK_ERROR doesn't throw or terminate if called in dtor
-    // or to remove them if they cause issues during shutdown.
-}
-
-void Sprite::SetupMesh() {
-    glGenVertexArrays(1, &m_VAO);
-    glGenBuffers(1, &m_VBO);
-    GL_CHECK_ERROR("glGenVertexArrays + glGenBuffers");
-
-    glBindVertexArray(m_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    // Use m_vertices and GL_DYNAMIC_DRAW since UVs might change
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertices), m_vertices, GL_DYNAMIC_DRAW);
-    GL_CHECK_ERROR("glBindVertexArray / glBufferData");
-
-    // Position attribute (location 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    GL_CHECK_ERROR("Position attribute");
-
-    // Texture coordinates attribute (location 1)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    GL_CHECK_ERROR("Texture coordinates attribute");
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    GL_CHECK_ERROR("Unbind VAO/VBO");
-}
+Sprite::~Sprite() {}
 
 void Sprite::Start() {
-    SetupMesh(); // Now uses m_vertices which might have been set by SetTextureRect before Start
+    // Si une texture est déjà définie au moment de Start(), on peut configurer le rect.
+    // Sinon, le rect par défaut (texture entière) est déjà appliqué dans le constructeur.
     if (m_texture) {
         SetTextureRect(0.0f, 0.0f, m_texture->Width(), m_texture->Height());
     }
-    GL_CHECK_ERROR("SetupMesh");
 }
 
 void Sprite::SetTextureRect(float pixel_x, float pixel_y, float pixel_width, float pixel_height) {
     if (!m_texture) {
         Debug::Warning("Sprite::SetTextureRect - Texture non définie. Impossible de calculer les UVs à partir des pixels.");
         InitializeVertices(0.0f, 0.0f, 1.0f, 1.0f); // Fallback sur la texture entière
-        m_currentTextureRectNormalized = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-        // Si le VBO existe déjà, il faudrait le mettre à jour avec les vertices par défaut
-        if (m_VAO != 0) {
-             glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices);
-             glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
         return;
     }
 
@@ -117,7 +62,6 @@ void Sprite::SetTextureRect(float pixel_x, float pixel_y, float pixel_width, flo
         Debug::Warning("Sprite::SetTextureRect - La texture a des dimensions nulles. Impossible de calculer les UVs.");
         InitializeVertices(0.0f, 0.0f, 1.0f, 1.0f); // Fallback
         m_currentTextureRectNormalized = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-        if (m_VAO != 0) { /* cf. ci-dessus */ }
         return;
     }
 
@@ -142,51 +86,60 @@ void Sprite::SetTextureRect(float pixel_x, float pixel_y, float pixel_width, flo
 
     if (u_min_norm > u_max_norm) { std::swap(u_min_norm, u_max_norm); }
     if (v_min_norm > v_max_norm) { std::swap(v_min_norm, v_max_norm); }
-    
+
     InitializeVertices(u_min_norm, v_min_norm, u_max_norm, v_max_norm);
     m_currentTextureRectNormalized = glm::vec4(u_min_norm, v_min_norm, u_max_norm, v_max_norm);
-
-    if (m_VAO != 0) { // Si le VAO (et donc VBO) existe déjà, mettre à jour le VBO
-        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        GL_CHECK_ERROR("Update VBO in SetTextureRect");
-    }
 }
 
 glm::vec4 Sprite::GetTextureRect() const {
     return m_currentTextureRectNormalized;
 }
 
-void Sprite::Render(Shader& shader) {
-    if (m_texture == nullptr) {
-        Debug::Error("Sprite::Render: No Texture linked to Sprite.");
-        return;
+std::array<SpriteVertex, 6> Sprite::GetVerticesData() const {
+    std::array<SpriteVertex, 6> batchedVertices;
+    glm::mat4 modelMatrix = m_owner->GetTransform().GetLocalModelMatrix2D(m_texture, m_currentTextureRectNormalized);
+
+    for (int i = 0; i < 6; i++) {
+        // Transforme la position locale du sommet par la matrice modèle de l'entité
+        glm::vec4 transformedPos = modelMatrix * glm::vec4(m_localVertices[i].position, 1.0f);
+        batchedVertices[i].position = glm::vec3(transformedPos);
+
+        // Copie les coordonnées de texture
+        batchedVertices[i].texCoords = m_localVertices[i].texCoords;
+
+        // Copie la couleur du sprite pour tous les sommets
+        batchedVertices[i].color = m_color;
     }
-    if (m_VAO == 0) {
-        Debug::Error("Sprite::Render: VAO not initialized. Was Start() called?");
-        return;
-    }
 
-    bool hasTexture = (m_texture != nullptr);
-
-    shader.SetInt("useTexture", hasTexture);
-    
-    // Model matrix: m_owner is the Entity this component is attached to.
-    // GetLocalModelMatrix2D might need adjustment if sprite size should depend on texture rect portion.
-    // For now, it scales a unit quad based on the Entity's transform.
-    shader.SetMat4("model", m_owner->GetTransform().GetLocalModelMatrix2D(m_texture, m_currentTextureRectNormalized));
-    
-    // Default sprite color, can be parameterized if needed
-    shader.SetVec4("spriteColor", m_color); 
-    GL_CHECK_ERROR("Uniform updates");
-
-    glBindVertexArray(m_VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices for 2 triangles
-    glBindVertexArray(0);
-    GL_CHECK_ERROR("glDrawArrays");
+    return batchedVertices;
 }
 
 std::string Sprite::ShaderType() {
-    return "sprite"; // This likely matches a shader file named "sprite.glsl" or similar
+    return "sprite";
+}
+
+AABB Sprite::GetWorldAABB() const {
+    // Calcul de l'AABB mondiale basé sur la transformation de l'entité et les dimensions de la texture.
+    // Si la taille du sprite est indépendante de la texture (e.g. toujours un quad unitaire),
+    // alors la logique de GetLocalModelMatrix2D devrait gérer le scaling.
+    // Ici, on va estimer l'AABB en utilisant la position et les dimensions de la texture (si présente).
+    // Si pas de texture, on peut prendre une taille par défaut (ex: 1x1).
+
+    glm::vec3 position = m_owner->GetTransform().GetLocalPosition();
+    glm::vec3 scale = m_owner->GetTransform().GetLocalScale();
+    glm::vec2 pos = { position.x, position.y };
+    glm::vec2 size;
+
+    if (m_texture) {
+        size = { m_texture->Width(), m_texture->Height() };
+    }
+    else {
+        size = { 1.0f, 1.0f };
+    }
+
+    size.x *= scale.x;
+    size.y *= scale.y;
+
+    glm::vec2 halfSize = size * 0.5f;
+    return { pos - halfSize, pos + halfSize };
 }

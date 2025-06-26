@@ -46,7 +46,9 @@ class Window {
         FT_Library FT();
 
         Color BackgroundColor;
-        WindowContext m_context;
+
+        WindowContext GetContext() const;
+        void SetContext(WindowContext context);
 
         GLFWwindow* GLFWWindow() const;
 
@@ -67,7 +69,7 @@ class Window {
 
         FT_Library m_ft;
         Scene m_scene;
-        Renderer m_renderer;
+        std::unique_ptr<Renderer> m_renderer;
 
         void OnResize(int width, int height);
         static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -83,6 +85,7 @@ class Window {
         int m_height = 600;
 
         std::unique_ptr<py::object> m_game;
+        WindowContext m_context;
 };
 
 #endif

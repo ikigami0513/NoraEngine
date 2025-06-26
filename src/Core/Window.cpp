@@ -87,6 +87,8 @@ void Window::InitFreeType() {
 }
 
 void Window::Setup() {
+    m_renderer = std::make_unique<Renderer>();
+
     AssetsManager::AddShader("mesh", std::make_unique<Shader>("../resources/shaders/mesh/vert.glsl", "../resources/shaders/mesh/frag.glsl"));
     AssetsManager::AddShader("text", std::make_unique<Shader>("../resources/shaders/text/vert.glsl", "../resources/shaders/text/frag.glsl"));
     AssetsManager::AddShader("3d_model", std::make_unique<Shader>("../resources/shaders/3d_model/vert.glsl", "../resources/shaders/3d_model/frag.glsl"));
@@ -110,19 +112,19 @@ void Window::Render() {
 
     bool hasCamera = false;
     if (m_context == WindowContext::Context3D) {
-        hasCamera = m_renderer.Rendering3D(m_scene, m_width, m_height);
+        hasCamera = m_renderer->Rendering3D(m_scene, m_width, m_height);
     }
     else if (m_context == WindowContext::Context2D) {
-        hasCamera = m_renderer.Rendering2D(m_scene, m_width, m_height);
+        hasCamera = m_renderer->Rendering2D(m_scene, m_width, m_height);
     }
 
     if (hasCamera) {
-        m_renderer.RenderingGUI(m_scene, m_width, m_height);
+        m_renderer->RenderingGUI(m_scene, m_width, m_height);
     }
 }
 
 void Window::Shutdown() {
-    m_game = std::make_unique<py::object>(); // Reset to null object
+    // m_game = std::make_unique<py::object>(); // Reset to null object
 }
 
 void Window::Run() {
@@ -227,6 +229,28 @@ void Window::SetScene(const Scene& scene) {
 
 FT_Library Window::FT() {
     return m_ft;
+}
+
+WindowContext Window::GetContext() const {
+    return m_context;
+}
+
+void Window::SetContext(WindowContext context) {
+    m_context = context;
+
+    if (m_context == WindowContext::Context2D) {
+        glDisable(GL_DEPTH_TEST);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_CULL_FACE); // Keeps culling enabled, ensure your quad winding is correct
+    }
+    else if (m_context == WindowContext::Context3D) {
+        glDisable(GL_BLEND);
+        glDisable(GL_CULL_FACE);
+
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 GLFWwindow* Window::GLFWWindow() const {

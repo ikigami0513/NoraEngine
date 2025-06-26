@@ -157,10 +157,10 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         .def_property_static(
             "context",
             [](py::object) -> WindowContext {
-                return Window::GetInstance().m_context;
+                return Window::GetInstance().GetContext();
             },
             [](py::object, WindowContext new_context) {
-                Window::GetInstance().m_context = new_context;
+                Window::GetInstance().SetContext(new_context);
             }
         )
         .def_static("set_title", [](const std::string& title) {
@@ -450,7 +450,12 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
             .def_property("offset", [](const RectCollider& collider) { return collider.offset; }, [](RectCollider& collider, const Offset& p_offset) { collider.offset = p_offset; });
 
         py::class_<Rigidbody2D, Component, std::shared_ptr<Rigidbody2D>>(m, "Rigidbody2D")
-            .def(py::init<>());
+            .def(py::init<>())
+            .def_property(
+                "velocity",
+                &Rigidbody2D::GetVelocity,
+                &Rigidbody2D::SetVelocity
+            );
 
         py::class_<Button, Component, std::shared_ptr<Button>>(m, "Button")
             .def(py::init<>())

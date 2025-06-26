@@ -26,6 +26,7 @@ class PlayerComponent(Component):
         self.direction = PlayerDirection.DOWN
         self.sprite = self.owner.get_component(Sprite)
         self.animation = self.owner.get_component(Animation2D)
+        self.rigidbody = self.owner.get_component(Rigidbody2D)
         self.sword_whoosh_sound = self.owner.get_component(SoundComponent)
         self.velocity = Vec2(0.0, 0.0)
         self.speed = 50.0
@@ -86,10 +87,11 @@ class PlayerComponent(Component):
             else:
                 if self.velocity.x != 0 or self.velocity.y != 0:
                     self.velocity = self.velocity.normalized()
-                    displacement = self.velocity * self.speed * Time.delta_time
-                    self.owner.transform.local_position += Vec3(displacement.x, displacement.y, 0.0)
+                    displacement = self.velocity * self.speed
+                    self.rigidbody.velocity = displacement
                     new_state = PlayerState.RUN
                 else:
+                    self.rigidbody.velocity = Vec2(0.0, 0.0)
                     new_state = PlayerState.IDLE
 
                 if new_direction != self.direction or new_state != self.state:
