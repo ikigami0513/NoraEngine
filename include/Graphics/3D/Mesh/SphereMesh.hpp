@@ -1,7 +1,7 @@
 #ifndef SPHERE_MESH_HPP
 #define SPHERE_MESH_HPP
 
-#include "Graphics/3D/Mesh/RenderComponent.hpp"
+#include "Graphics/3D/Mesh/MeshedRenderComponent.hpp"
 #include "ECS/Component.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-class SphereMesh : public RenderComponent {
+class SphereMesh : public MeshedRenderComponent {
     public:
         SphereMesh(unsigned int sectorCount = 36, unsigned int stackCount = 18);
         ~SphereMesh();

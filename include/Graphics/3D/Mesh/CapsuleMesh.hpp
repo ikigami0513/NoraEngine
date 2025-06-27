@@ -7,12 +7,12 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "Graphics/3D/Mesh/RenderComponent.hpp"
+#include "Graphics/3D/Mesh/MeshedRenderComponent.hpp"
 #include "ECS/Component.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
 
-class CapsuleMesh : public RenderComponent {
+class CapsuleMesh : public MeshedRenderComponent {
     public:
         CapsuleMesh(float radius = 0.5f, float cylinderHeight = 1.0f, unsigned int sectorCount = 36, unsigned int hemisphereStacks = 18, unsigned int cylinderStacks = 10);
         ~CapsuleMesh();

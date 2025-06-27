@@ -4,7 +4,6 @@
 #include "World/Camera3D.hpp"
 #include "World/Camera2D.hpp"
 #include "ECS/Entity.hpp"
-#include "Graphics/3D/Mesh/RenderComponent.hpp"
 #include "Gui/GuiComponent.hpp"
 #include "Graphics/2D/Sprite.hpp"
 #include "Core/Input/Mouse.hpp"
@@ -94,6 +93,7 @@ void Window::Setup() {
     AssetsManager::AddShader("3d_model", std::make_unique<Shader>("../resources/shaders/3d_model/vert.glsl", "../resources/shaders/3d_model/frag.glsl"));
     AssetsManager::AddShader("sprite", std::make_unique<Shader>("../resources/shaders/sprite/vert.glsl", "../resources/shaders/sprite/frag.glsl"));
     AssetsManager::AddShader("shape", std::make_unique<Shader>("../resources/shaders/shape/vert.glsl", "../resources/shaders/shape/frag.glsl"));
+    AssetsManager::AddShader("skybox", std::make_unique<Shader>("../resources/shaders/skybox/vert.glsl", "../resources/shaders/skybox/frag.glsl"));
 }
 
 void Window::ProcessInput() {

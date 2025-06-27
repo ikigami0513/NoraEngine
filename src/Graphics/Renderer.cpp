@@ -4,7 +4,7 @@
 #include "World/Camera2D.hpp"
 #include "Utils/Debug.hpp"
 #include "Utils/Utils.hpp"
-#include "Graphics/3D/Mesh/RenderComponent.hpp"
+#include "Graphics/3D/RenderComponent.hpp"
 #include "Core/AssetsManager.hpp"
 #include "Gui/GuiComponent.hpp"
 #include <algorithm>

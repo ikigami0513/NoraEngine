@@ -2,6 +2,7 @@
 #include <pybind11/embed.h>
 #include <pybind11/operators.h>
 #include <pybind11/functional.h>
+#include <pybind11/stl.h>
 #include "Core/Time.hpp"
 #include "Core/Input/Input.hpp"
 #include "Core/Input/Mouse.hpp"
@@ -15,10 +16,13 @@
 #include "World/Camera3D.hpp"
 #include "World/Camera2D.hpp"
 #include "Physics/Transform.hpp"
+#include "Graphics/3D/Mesh/MeshedRenderComponent.hpp"
 #include "Graphics/3D/Mesh/CuboidMesh.hpp"
 #include "Graphics/3D/Mesh/SphereMesh.hpp"
 #include "Graphics/3D/Mesh/CapsuleMesh.hpp"
 #include "Graphics/3D/Mesh/3DModel/Model.hpp"
+#include "Graphics/3D/RenderComponent.hpp"
+#include "Graphics/3D/Skybox.hpp"
 #include "Physics/2D/RectCollider.hpp"
 #include "Physics/2D/Rigidbody2D.hpp"
 #include "Physics/Offset.hpp"
@@ -357,23 +361,29 @@ PYBIND11_EMBEDDED_MODULE(nora, m) {
         py::class_<Font, std::shared_ptr<Font>>(m, "Font")
             .def(py::init<const std::string&, unsigned int>(), py::arg("font_path"), py::arg("font_size") = 48);
 
-        py::class_<RenderComponent, Component, std::shared_ptr<RenderComponent>>(m, "RenderComponent")
-            .def_property("texture", &RenderComponent::GetTexture, &RenderComponent::SetTexture);
+        py::class_<RenderComponent, Component, std::shared_ptr<RenderComponent>>(m, "RenderComponent");
 
-        py::class_<CuboidMesh, RenderComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
+        py::class_<Skybox, RenderComponent, std::shared_ptr<Skybox>>(m, "Skybox")
+            .def(py::init<>())
+            .def_property("faces", &Skybox::GetFaces, &Skybox::SetFaces);
+
+        py::class_<MeshedRenderComponent, RenderComponent, std::shared_ptr<MeshedRenderComponent>>(m, "MeshedRenderComponent")
+            .def_property("texture", &MeshedRenderComponent::GetTexture, &MeshedRenderComponent::SetTexture);
+
+        py::class_<CuboidMesh, MeshedRenderComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
             .def(py::init<>());
 
-        py::class_<SphereMesh, RenderComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
+        py::class_<SphereMesh, MeshedRenderComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
             .def(py::init<unsigned int, unsigned int>(), py::arg("sector_count") = 36, py::arg("stack_count") = 18);
 
-        py::class_<CapsuleMesh, RenderComponent, std::shared_ptr<CapsuleMesh>>(m, "CapsuleMesh")
+        py::class_<CapsuleMesh, MeshedRenderComponent, std::shared_ptr<CapsuleMesh>>(m, "CapsuleMesh")
             .def(
                 py::init<float, float, unsigned int, unsigned int, unsigned int>(),
                 py::arg("radius") = 0.5f, py::arg("cylinder_height") = 1.0f, py::arg("sector_count") = 36,
                 py::arg("hemisphere_stacks") = 18, py::arg("cylinder_stacks") = 10
             );
 
-        py::class_<Model, RenderComponent, std::shared_ptr<Model>>(m, "Model")
+        py::class_<Model, MeshedRenderComponent, std::shared_ptr<Model>>(m, "Model")
             .def(py::init<std::string>(), py::arg("path") = "")
             .def_property("path", 
                 [](Model& self) -> std::string {

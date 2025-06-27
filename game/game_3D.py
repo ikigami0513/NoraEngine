@@ -78,3 +78,17 @@ def create_3d_world():
     model.set_owner(rock)
     rock.add_component(model)
     Window.scene.add_entity(rock)
+
+    skybox_entity = Entity()
+    skybox = Skybox()
+    skybox.faces = [
+        "../resources/textures/skybox/right.jpg",
+        "../resources/textures/skybox/left.jpg",
+        "../resources/textures/skybox/top.jpg",
+        "../resources/textures/skybox/bottom.jpg",
+        "../resources/textures/skybox/front.jpg",
+        "../resources/textures/skybox/back.jpg",
+    ]
+    skybox.set_owner(skybox_entity)
+    skybox_entity.add_component(skybox)
+    Window.scene.add_entity(skybox_entity)

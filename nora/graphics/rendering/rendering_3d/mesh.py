@@ -4,25 +4,29 @@ from abc import ABC
 
 
 class RenderComponent(ABC, Component):
+    pass
+
+
+class MeshedRenderComponent(ABC, RenderComponent):
     texture: Texture
 
 
-class CuboidMesh(RenderComponent):
+class CuboidMesh(MeshedRenderComponent):
     def __init__(self): ...
 
 
-class SphereMesh(RenderComponent):
+class SphereMesh(MeshedRenderComponent):
     def __init__(self, sector_count: int = 36, stack_count: int = 18): ...
 
 
-class CapsuleMesh(RenderComponent):
+class CapsuleMesh(MeshedRenderComponent):
     def __init__(
         self, radius: float = 0.5, cylinder_height: float = 1.0, 
         sector_count: int = 36, hemisphere_stacks: int = 18, cylinder_stacks: int = 10
     ): ...
 
 
-class Model(RenderComponent):
+class Model(MeshedRenderComponent):
     def __init__(self, path: str = ""): ...
 
     path: str

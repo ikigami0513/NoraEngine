@@ -16,12 +16,12 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Graphics/3D/Mesh/RenderComponent.hpp"
+#include "Graphics/3D/Mesh/MeshedRenderComponent.hpp"
 #include "Graphics/3D/Mesh/3DModel/Mesh.hpp"
 #include "Graphics/Shader.hpp"
 #include "Graphics/Texture.hpp"
 
-class Model : public RenderComponent {
+class Model : public MeshedRenderComponent {
     public:
         // model data
         std::vector<Texture> textures_loaded; // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.

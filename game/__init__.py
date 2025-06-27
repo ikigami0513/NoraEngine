@@ -4,6 +4,7 @@ from typing import Dict, Any
 from game.init_fps_display import init_fps_display
 from game.stat_component import StatComponent
 from game.player_component import PlayerComponent
+from game.game_3D import create_3d_world
 
 
 player_entity = None
@@ -163,4 +164,4 @@ def initialize() -> None:
     Window.set_size(size.get("width", 600), size.get("height", 800))
     Window.context = getattr(WindowContext, f"Context{settings.get('context')}")
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
-    create_2d_world()
+    create_3d_world()

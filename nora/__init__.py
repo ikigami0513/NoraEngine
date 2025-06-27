@@ -11,7 +11,8 @@ from nora.graphics.rendering.rendering_2d.animation_2d import Animation2D
 from nora.graphics.rendering.rendering_2d.sprite import Sprite
 
 from nora.graphics.rendering.rendering_3d.camera_3d import Camera3D
-from nora.graphics.rendering.rendering_3d.mesh import RenderComponent, CuboidMesh, SphereMesh, CapsuleMesh, Model
+from nora.graphics.rendering.rendering_3d.mesh import MeshedRenderComponent, CuboidMesh, SphereMesh, CapsuleMesh, Model
+from nora.graphics.rendering.rendering_3d.skybox import Skybox
 
 from nora.gui.gui import GuiComponent, Font, Text, Rectangle, Alignment, Button
 
