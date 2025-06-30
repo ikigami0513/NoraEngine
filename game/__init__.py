@@ -135,7 +135,6 @@ def create_2d_world():
         container_sprite.set_owner(container_entity)
         container_entity.add_component(container_sprite)
 
-        # Suppression du RectCollider ici
         Window.scene.add_entity(container_entity)
 
     # Création du RectCollider global
@@ -154,7 +153,6 @@ def create_2d_world():
     Window.scene.add_entity(collider_entity)
 
 
-
 def initialize() -> None:
     with open("../settings.json", "rb") as f:
         settings: Dict[str, Any] = json.load(f)
@@ -164,4 +162,9 @@ def initialize() -> None:
     Window.set_size(size.get("width", 600), size.get("height", 800))
     Window.context = getattr(WindowContext, f"Context{settings.get('context')}")
     Window.background_color = Color(0.2, 0.3, 0.3, 1.0)
-    create_3d_world()
+    if Window.context == WindowContext.Context2D:
+        create_2d_world()
+    elif Window.context == WindowContext.Context3D:
+        create_3d_world()
+    else:
+        raise Exception("Invalid Context")
