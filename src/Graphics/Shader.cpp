@@ -42,6 +42,11 @@ void Shader::Use() const {
     glUseProgram(ID);
 }
 
+bool Shader::HasUniform(const std::string& name) {
+    GLint location = glGetUniformLocation(ID, name.c_str());
+    return (location != -1);
+}
+
 
 // Uniform setters
 void Shader::SetBool(const std::string& name, bool value) const { glUniform1i(GetLoc(name), (int)value); }

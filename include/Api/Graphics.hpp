@@ -54,7 +54,27 @@ void bind_graphics(py::module_ m) {
         }, "Direction vector right of the camera.")
         .def_property("zoom", &Camera3D::GetZoom, &Camera3D::SetZoom, "Camera field of view in degrees.")
         .def_property("yaw", &Camera3D::GetYaw, &Camera3D::SetYaw, "Camera field of view in degrees.")
-        .def_property("pitch", &Camera3D::GetPitch, &Camera3D::SetPitch, "Camera field of view in degrees.");
+        .def_property("pitch", &Camera3D::GetPitch, &Camera3D::SetPitch, "Camera field of view in degrees.")
+        .def_property(
+            "has_fog", 
+            [](const Camera3D& cam) { return cam.hasFog; }, 
+            [](Camera3D& cam, bool value) { cam.hasFog = value; }
+        )
+        .def_property(
+            "fog_color",
+            [](const Camera3D& cam) { return cam.fogColor; },
+            [](Camera3D& cam, Color color) { cam.fogColor = color; }
+        )
+        .def_property(
+            "min_fog_dist",
+            [](const Camera3D cam) { return cam.minFogDist; },
+            [](Camera3D& cam, float value) { cam.minFogDist = value; }
+        )
+        .def_property(
+            "max_fog_dist",
+            [](const Camera3D cam) { return cam.maxFogDist; },
+            [](Camera3D& cam, float value) { cam.maxFogDist = value; }
+        );
 
     py::class_<Camera2D, Component, std::shared_ptr<Camera2D>>(m, "Camera2D")
         .def(py::init<>())

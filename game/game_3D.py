@@ -55,6 +55,8 @@ def init_camera_and_controller():
     e.add_component(player_controller)
 
     camera = Camera3D()
+    camera.has_fog = False
+    camera.fog_color = Color(0.7, 0.7, 0.7, 1.0)
     camera.set_owner(e)
     e.add_component(camera)
 

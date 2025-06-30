@@ -216,6 +216,10 @@ bool Renderer::Rendering3D(Scene scene, int width, int height) {
     if (!cameraEntities.empty()) {
         Camera3D* camera = cameraEntities[0]->GetComponent<Camera3D>();
 
+        if (camera->hasFog) {
+            Debug::Info("camera has Fog");
+        }
+
         // camera/view transformation
         glm::mat4 view = camera->GetViewMatrix();
 
@@ -225,6 +229,17 @@ bool Renderer::Rendering3D(Scene scene, int width, int height) {
         for (Entity* entity : meshedEntities) {
             RenderComponent* mesh = entity->GetComponent<RenderComponent>();
             Shader* shader = AssetsManager::GetShader(mesh->ShaderType());
+            shader->Use();
+            if (shader->HasUniform("hasFog") && camera->hasFog) {
+                shader->SetBool("hasFog", true);
+                shader->SetVec4("fogColor", glm::vec4(camera->fogColor.r, camera->fogColor.g, camera->fogColor.b, camera->fogColor.alpha));
+                shader->SetFloat("minFogDist", camera->minFogDist);
+                shader->SetFloat("maxFogDist", camera->maxFogDist);
+                GL_CHECK_ERROR("Activate Fog");
+            }
+            else {
+                shader->SetBool("hasFog", false);
+            }
             mesh->Render(*shader, view, projection);
         }
 

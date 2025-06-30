@@ -3,6 +3,7 @@
 
 #include "ECS/Component.hpp"
 #include "Core/Time.hpp"
+#include "Graphics/Color.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -57,6 +58,11 @@ class Camera3D : public Component {
         glm::vec3 GetFront() const;
         glm::vec3 GetRight() const;
         void Update() override;
+
+        bool hasFog = false;
+        Color fogColor;
+        float minFogDist = 8.0f;
+        float maxFogDist = 15.0f;
 };
 
 #endif
