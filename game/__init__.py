@@ -118,39 +118,13 @@ def create_2d_world():
 
     Window.scene.add_entity(player_entity)
 
-    container_texture = Texture("../resources/textures/container.jpg")
-    container_scale = Vec3(0.2, 0.2, 0.0)
-    container_count = 1000
-    container_width = container_texture.width * container_scale.x
-    container_height = container_texture.height * container_scale.y
-    start_x = 500.0
-
-    for i in range(container_count):
-        container_entity = Entity()
-        container_entity.transform.local_scale = container_scale
-        container_entity.transform.local_position = Vec3(start_x, container_height * i, 0.0)
-
-        container_sprite = Sprite()
-        container_sprite.texture = container_texture
-        container_sprite.set_owner(container_entity)
-        container_entity.add_component(container_sprite)
-
-        Window.scene.add_entity(container_entity)
-
-    # Création du RectCollider global
-    collider_entity = Entity()
-    total_height = container_height * container_count
-    collider_entity.transform.local_position = Vec3(
-        start_x,
-        total_height / 2 - container_height / 2,  # position au centre de la pile
-        0.0
-    )
-    collider_entity.transform.local_scale = Vec3(container_width, total_height, 0.0)
-
-    big_collider = RectCollider()
-    big_collider.set_owner(collider_entity)
-    collider_entity.add_component(big_collider)
-    Window.scene.add_entity(collider_entity)
+    t_entity = Entity()
+    t_entity.transform.local_position = Vec3(0.0, 0.0, -1.0)
+    tilemap = Tilemap()
+    tilemap.tilemap_path = "../resources/tilemaps/dev.xml"
+    tilemap.set_owner(t_entity)
+    t_entity.add_component(tilemap)
+    Window.scene.add_entity(t_entity)
 
 
 def initialize() -> None:

@@ -13,9 +13,10 @@
 #include "Graphics/3D/Mesh/SphereMesh.hpp"
 #include "Graphics/3D/Mesh/CapsuleMesh.hpp"
 #include "Graphics/3D/Mesh/3DModel/Model.hpp"
+#include "Graphics/3D/Skybox.hpp"
 #include "Graphics/2D/Sprite.hpp"
 #include "Graphics/2D/Animation2D.hpp"
-#include "Graphics/3D/Skybox.hpp"
+#include "Graphics/2D/Tilemap.hpp"
 
 namespace py = pybind11;
 
@@ -80,71 +81,79 @@ void bind_graphics(py::module_ m) {
         .def(py::init<>())
         .def_property("target", &Camera2D::GetTarget, &Camera2D::SetTarget);
 
-        py::class_<RenderComponent, Component, std::shared_ptr<RenderComponent>>(m, "RenderComponent");
+    py::class_<RenderComponent, Component, std::shared_ptr<RenderComponent>>(m, "RenderComponent");
 
-        py::class_<Skybox, RenderComponent, std::shared_ptr<Skybox>>(m, "Skybox")
-            .def(py::init<>())
-            .def_property("faces", &Skybox::GetFaces, &Skybox::SetFaces);
+    py::class_<Skybox, RenderComponent, std::shared_ptr<Skybox>>(m, "Skybox")
+        .def(py::init<>())
+        .def_property("faces", &Skybox::GetFaces, &Skybox::SetFaces);
 
-        py::class_<MeshedRenderComponent, RenderComponent, std::shared_ptr<MeshedRenderComponent>>(m, "MeshedRenderComponent")
-            .def_property("texture", &MeshedRenderComponent::GetTexture, &MeshedRenderComponent::SetTexture);
+    py::class_<MeshedRenderComponent, RenderComponent, std::shared_ptr<MeshedRenderComponent>>(m, "MeshedRenderComponent")
+        .def_property("texture", &MeshedRenderComponent::GetTexture, &MeshedRenderComponent::SetTexture);
 
-        py::class_<CuboidMesh, MeshedRenderComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
-            .def(py::init<>());
+    py::class_<CuboidMesh, MeshedRenderComponent, std::shared_ptr<CuboidMesh>>(m, "CuboidMesh")
+        .def(py::init<>());
 
-        py::class_<SphereMesh, MeshedRenderComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
-            .def(py::init<unsigned int, unsigned int>(), py::arg("sector_count") = 36, py::arg("stack_count") = 18);
+    py::class_<SphereMesh, MeshedRenderComponent, std::shared_ptr<SphereMesh>>(m, "SphereMesh")
+        .def(py::init<unsigned int, unsigned int>(), py::arg("sector_count") = 36, py::arg("stack_count") = 18);
 
-        py::class_<CapsuleMesh, MeshedRenderComponent, std::shared_ptr<CapsuleMesh>>(m, "CapsuleMesh")
-            .def(
-                py::init<float, float, unsigned int, unsigned int, unsigned int>(),
-                py::arg("radius") = 0.5f, py::arg("cylinder_height") = 1.0f, py::arg("sector_count") = 36,
-                py::arg("hemisphere_stacks") = 18, py::arg("cylinder_stacks") = 10
-            );
+    py::class_<CapsuleMesh, MeshedRenderComponent, std::shared_ptr<CapsuleMesh>>(m, "CapsuleMesh")
+        .def(
+            py::init<float, float, unsigned int, unsigned int, unsigned int>(),
+            py::arg("radius") = 0.5f, py::arg("cylinder_height") = 1.0f, py::arg("sector_count") = 36,
+            py::arg("hemisphere_stacks") = 18, py::arg("cylinder_stacks") = 10
+        );
 
-        py::class_<Model, MeshedRenderComponent, std::shared_ptr<Model>>(m, "Model")
-            .def(py::init<std::string>(), py::arg("path") = "")
-            .def_property("path", 
-                [](Model& self) -> std::string {
-                    return self.path;
-                },
-                [](Model& self, std::string new_path) {
-                    self.path = new_path;
-                }
-            );
+    py::class_<Model, MeshedRenderComponent, std::shared_ptr<Model>>(m, "Model")
+        .def(py::init<std::string>(), py::arg("path") = "")
+        .def_property("path", 
+            [](Model& self) -> std::string {
+                return self.path;
+            },
+            [](Model& self, std::string new_path) {
+                self.path = new_path;
+            }
+        );
 
-        py::class_<Sprite, Component, std::shared_ptr<Sprite>>(m, "Sprite")
-            .def(py::init<>())
-            .def_property("texture", &Sprite::GetTexture, &Sprite::SetTexture);
+    py::class_<Sprite, Component, std::shared_ptr<Sprite>>(m, "Sprite")
+        .def(py::init<>())
+        .def_property("texture", &Sprite::GetTexture, &Sprite::SetTexture);
 
-        py::class_<Animation2D, Component, std::shared_ptr<Animation2D>>(m, "Animation2D")
-            .def(
-                py::init<int, int, int, int, int, bool>(),
-                py::arg("width"),
-                py::arg("height"),
-                py::arg("current_row"),
-                py::arg("frames_count"),
-                py::arg("animation_speed"),
-                py::arg("repeat") = true
-            )
-            .def_property(
-                "repeat",
-                &Animation2D::GetRepeat,
-                &Animation2D::SetRepeat
-            )
-            .def_property(
-                "finish",
-                &Animation2D::GetFinish,
-                &Animation2D::SetFinish
-            )
-            .def_property(
-                "current_frame",
-                &Animation2D::GetCurrentFrame,
-                &Animation2D::SetCurrentFrame
-            )
-            .def_property(
-                "frames_count",
-                &Animation2D::GetFramesCount,
-                &Animation2D::SetFramesCount
-            );
+    py::class_<Animation2D, Component, std::shared_ptr<Animation2D>>(m, "Animation2D")
+        .def(
+            py::init<int, int, int, int, int, bool>(),
+            py::arg("width"),
+            py::arg("height"),
+            py::arg("current_row"),
+            py::arg("frames_count"),
+            py::arg("animation_speed"),
+            py::arg("repeat") = true
+        )
+        .def_property(
+            "repeat",
+            &Animation2D::GetRepeat,
+            &Animation2D::SetRepeat
+        )
+        .def_property(
+            "finish",
+            &Animation2D::GetFinish,
+            &Animation2D::SetFinish
+        )
+        .def_property(
+            "current_frame",
+            &Animation2D::GetCurrentFrame,
+            &Animation2D::SetCurrentFrame
+        )
+        .def_property(
+            "frames_count",
+            &Animation2D::GetFramesCount,
+            &Animation2D::SetFramesCount
+        );
+
+    py::class_<Tilemap, Component, std::shared_ptr<Tilemap>>(m, "Tilemap")
+        .def(py::init<>())
+        .def_property(
+            "tilemap_path",
+            &Tilemap::GetTilemapPath,
+            &Tilemap::SetTilemapPath
+        );
 }

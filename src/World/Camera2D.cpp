@@ -28,7 +28,7 @@ glm::mat4 Camera2D::GetProjectionMatrix() const {
     return glm::ortho(
         0.0f, static_cast<float>(size.first), 
         0.0f, static_cast<float>(size.second), 
-        -1.0f, 1.0f
+        -10.0f, 10.0f
     );
 }
 
