@@ -1,0 +1,15 @@
+{
+    "name": "NoraEngine",
+    "cmake": "cmake .. -G \"MinGW Makefiles\" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++",
+    "make": "mingw32-make.exe",
+    "dependencies": {
+        "glfw": "3.4",
+        "glad": "core-gl-3.3",
+        "stb-image": "1.0.0",
+        "raudio": "1.0.0",
+        "glm": "1.0.1",
+        "pybind11": "2.13.6",
+        "freetype": "2.13.3",
+        "assimp": "6.0.2"
+    }
+}

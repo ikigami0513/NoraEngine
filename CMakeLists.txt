@@ -1,28 +1,4 @@
-#https://github.com/meemknight/GLFWCMakeSetup
-#Version 1.0.0
-
-cmake_minimum_required(VERSION 3.16)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 11)
-
-#! ! ! ! ! ! !
-#set this to true to ship the game!
-#basically this will change the RESOURCES_PATH to be the local path
-#! ! ! ! ! ! !
-#DELETE THE OUT FOLDER AFTER CHANGING THIS BECAUSE VISUAL STUDIO DOESN'T SEEM TO RECOGNIZE THIS CHANGE AND REBUILD!
-option(PRODUCTION_BUILD "Make this a production build" OFF)
-#DELETE THE OUT FOLDER AFTER CHANGING THIS BECAUSE VISUAL STUDIO DOESN'T SEEM TO RECOGNIZE THIS CHANGE AND REBUILD!
-
-
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE) #link time optimization
-
-if(MSVC) 
-add_compile_options(/arch:AVX2) #make sure SIMD optimizations take place
-endif()
+cmake_minimum_required(VERSION 3.10)
 
 project(NoraEngine)
 
@@ -35,71 +11,59 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 
-add_subdirectory(thirdparty/glfw-3.3.2)			# window oppener
-add_subdirectory(thirdparty/glad)				# opengl loader
-add_subdirectory(thirdparty/stb_image)			# loading image
-add_subdirectory(thirdparty/enet-1.3.17)		# networking
-add_subdirectory(thirdparty/raudio)				# audio
-add_subdirectory(thirdparty/glm)				# math
-add_subdirectory(thirdparty/pybind11-master)    # python binding
-add_subdirectory(thirdparty/freetype-2.13.3)    # text rendering
-add_subdirectory(thirdparty/assimp-5.4.3)       # model loading
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(assimp PRIVATE -Wno-error)
-endif()
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
 
+include_directories(include)
+include_directories(packages)
 
-# MY_SOURCES is defined to be a list of all the source files for my game 
-# DON'T ADD THE SOURCES BY HAND, they are already added with this macro
-file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-
-add_executable("${CMAKE_PROJECT_NAME}")
-
-set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 17)
-
+add_executable(NoraEngine ${SOURCES})
 
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLFW_INCLUDE_NONE=1) 
-
-if(PRODUCTION_BUILD)
-	# setup the ASSETS_PATH macro to be in the root folder of your exe
-	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="./resources/") 
-
-	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PRODUCTION_BUILD=1) 
-
-else()
-	# This is useful to get an ASSETS_PATH in your IDE during development
-	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
-	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PRODUCTION_BUILD=0) 
-
-endif()
-
-target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE pybind11::embed Python3::Python)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     message(STATUS "Forcing RTTI ON for GCC/Clang")
     target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -frtti)
 endif()
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/glfw-3.4)
 
-if(MSVC) # If using the VS compiler...
+target_link_libraries(NoraEngine PRIVATE glfw)
 
-	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC _CRT_SECURE_NO_WARNINGS)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/glad-core-gl-3.3)
 
-	#add this line if you want to remove the console!
-	#set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup") #no console
-	
-	#set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDebug<$<CONFIG:Debug>:Debug>")
-	#set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+target_link_libraries(NoraEngine PRIVATE glad)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/stb-image-1.0.0)
+
+target_link_libraries(NoraEngine PRIVATE stb_image)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/raudio-1.0.0)
+
+target_link_libraries(NoraEngine PRIVATE raudio)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/glm-1.0.1)
+
+target_link_libraries(NoraEngine PRIVATE glm)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/pybind11-2.13.6)
+
+target_link_libraries(NoraEngine PRIVATE pybind11::embed Python3::Python)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/freetype-2.13.3)
+
+target_link_libraries(NoraEngine PRIVATE freetype)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/packages/assimp-6.0.2)
+
+target_link_libraries(NoraEngine PRIVATE assimp)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(assimp PRIVATE -Wno-error)
 endif()
-
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-
-#enet not working yet on linux for some reason
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw 
-	glad stb_image enet raudio freetype assimp)
-

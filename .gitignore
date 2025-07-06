@@ -8,3 +8,4 @@ Makefile
 venv/
 *.pyc
 /.vscode/
+packages/
